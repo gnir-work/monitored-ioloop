@@ -3,4 +3,5 @@ from dataclasses import dataclass
 
 @dataclass
 class IoLoopMonitorState:
-    single_loop_duration: float
+    wall_loop_duration: float
+    cpu_loop_duration: float
