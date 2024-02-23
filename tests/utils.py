@@ -1,6 +1,6 @@
 import time
 
-BLOCK_THRESHOLD = 0.05
+BLOCK_THRESHOLD = 0.075
 
 
 def busy_wait(seconds_to_wait: float = 1) -> None:
