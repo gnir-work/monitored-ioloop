@@ -43,7 +43,12 @@ jobs:
       #----------------------------------------------
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --with dev,uvloop
+        run: poetry install --no-interaction --with dev,uvloop,stress_test
+      #----------------------------------------------
+      # install dependencies if cache does not exist
+      #----------------------------------------------
+      - name: Lint code
+        run: make lint
       #----------------------------------------------
       #    add matrix specifics and run test suite
       #----------------------------------------------
