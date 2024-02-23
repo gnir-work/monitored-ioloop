@@ -49,5 +49,4 @@ jobs:
       #----------------------------------------------
       - name: Run tests
         run: |
-          make test
-          coverage report
+          pytest tests.py --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
