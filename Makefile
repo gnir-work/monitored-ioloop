@@ -1,5 +1,5 @@
 install:
-	poetry install --with dev
+	poetry install --with dev,uvloop,stress_test
 
 format:
 	poetry run ruff format

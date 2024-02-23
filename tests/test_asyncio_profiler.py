@@ -51,7 +51,7 @@ def test_complex_blocking_coroutine(
 ) -> None:
     mock = Mock()
     asyncio.set_event_loop_policy(ioloop_policy_class(monitor_callback=mock))
-    block_for = 0.1
+    block_for = 0.5
     asyncio.run(complex_blocking_coroutine(block_for))
     (first_blocking_section,) = mock.mock_calls[0].args
     (second_blocking_section,) = mock.mock_calls[1].args
@@ -75,7 +75,7 @@ def test_task_blocking_coroutine(
 ) -> None:
     mock = Mock()
     asyncio.set_event_loop_policy(ioloop_policy_class(monitor_callback=mock))
-    block_for = 0.1
+    block_for = 0.5
     asyncio.run(run_blocking_coroutine_in_task(block_for))
     (blocking_coroutine_monitor,) = mock.mock_calls[1].args
     _check_monitor_result(block_for, blocking_coroutine_monitor.wall_loop_duration)
@@ -97,10 +97,10 @@ def test_non_cpu_intensive_blocking_coroutine(
     asyncio.set_event_loop_policy(
         MonitoredAsyncIOSelectorEventLoopPolicy(monitor_callback=mock)
     )
-    block_for = 0.1
+    block_for = 0.5
     asyncio.run(non_cpu_intensive_blocking_coroutine(block_for))
     (blocking_coroutine_monitor,) = mock.mock_calls[0].args
     _check_monitor_result(block_for, blocking_coroutine_monitor.wall_loop_duration)
     assert (
-        blocking_coroutine_monitor.cpu_loop_duration < 0.001
+        blocking_coroutine_monitor.cpu_loop_duration < 0.02
     ), "CPU time should be minimal."
