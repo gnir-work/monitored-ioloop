@@ -3,7 +3,7 @@ name: test
 on: pull_request
 
 env:
-  POETRY_GROUPS: dev,uvloop,stress_test
+  POETRY_GROUPS: dev,uvloop
 
 jobs:
   test:
@@ -46,7 +46,7 @@ jobs:
         run: poetry install --no-interaction --with $POETRY_GROUPS
 
       - name: Lint code
-        run: make lint
+        run: make lint TARGET_DIR=monitored_ioloop
 
       - name: Run tests
         run: |

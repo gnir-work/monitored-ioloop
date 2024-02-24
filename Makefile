@@ -1,20 +1,23 @@
+TARGET_DIR = .
+POETRY_GROUPS = dev,uvloop,stress_test
+
 install:
-	poetry install --with dev,uvloop,stress_test
+	poetry install --with ${POETRY_GROUPS}
 
 format:
-	poetry run ruff format
-	poetry run ruff check --fix --unsafe-fixes .
+	poetry run ruff format ${TARGET_DIR}
+	poetry run ruff check --fix --unsafe-fixes ${TARGET_DIR}
 
 lint-formatters:
-	poetry run ruff format --check
-	poetry run ruff check .
+	poetry run ruff format --check ${TARGET_DIR}
+	poetry run ruff check ${TARGET_DIR}
 
 lint-static-code-analysis:
-	poetry run mypy .
+	poetry run mypy ${TARGET_DIR}
 
 lint: lint-formatters lint-static-code-analysis
 
 pre-commit: format lint-static-code-analysis
 
 test:
-	poetry run pytest
+	poetry run pytest tests
