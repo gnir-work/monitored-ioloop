@@ -5,10 +5,12 @@ import typing
 import pytest
 from unittest.mock import Mock
 
-from monitored_ioloop import (
-    MonitoredAsyncIOSelectorEventLoopPolicy,
+from monitored_ioloop.monioted_ioloop_base import (
     BaseMonitoredEventLoopPolicy,
-    MonitoredUvloopEventLoopPolicy,
+)
+from monitored_ioloop.monitored_uvloop_ioloop import MonitoredUvloopEventLoopPolicy
+from monitored_ioloop.monitored_asyncio_ioloop import (
+    MonitoredAsyncIOEventLoopPolicy,
 )
 from tests.utils import busy_wait, _check_monitor_result
 
@@ -19,7 +21,7 @@ async def blocking_coroutine(block_for: float) -> None:
 
 @pytest.mark.parametrize(
     "ioloop_policy_class",
-    [MonitoredAsyncIOSelectorEventLoopPolicy, MonitoredUvloopEventLoopPolicy],
+    [MonitoredAsyncIOEventLoopPolicy, MonitoredUvloopEventLoopPolicy],
 )
 def test_simple_blocking_coroutine(
     ioloop_policy_class: typing.Type[BaseMonitoredEventLoopPolicy],
@@ -44,7 +46,7 @@ async def complex_blocking_coroutine(block_for: float) -> None:
 
 @pytest.mark.parametrize(
     "ioloop_policy_class",
-    [MonitoredAsyncIOSelectorEventLoopPolicy, MonitoredUvloopEventLoopPolicy],
+    [MonitoredAsyncIOEventLoopPolicy, MonitoredUvloopEventLoopPolicy],
 )
 def test_complex_blocking_coroutine(
     ioloop_policy_class: typing.Type[MonitoredUvloopEventLoopPolicy],
@@ -68,7 +70,7 @@ async def run_blocking_coroutine_in_task(block_for: float) -> None:
 
 @pytest.mark.parametrize(
     "ioloop_policy_class",
-    [MonitoredAsyncIOSelectorEventLoopPolicy, MonitoredUvloopEventLoopPolicy],
+    [MonitoredAsyncIOEventLoopPolicy, MonitoredUvloopEventLoopPolicy],
 )
 def test_task_blocking_coroutine(
     ioloop_policy_class: typing.Type[MonitoredUvloopEventLoopPolicy],
@@ -88,15 +90,13 @@ async def non_cpu_intensive_blocking_coroutine(block_time: float) -> None:
 
 @pytest.mark.parametrize(
     "ioloop_policy_class",
-    [MonitoredAsyncIOSelectorEventLoopPolicy, MonitoredUvloopEventLoopPolicy],
+    [MonitoredAsyncIOEventLoopPolicy, MonitoredUvloopEventLoopPolicy],
 )
 def test_non_cpu_intensive_blocking_coroutine(
     ioloop_policy_class: typing.Type[MonitoredUvloopEventLoopPolicy],
 ) -> None:
     mock = Mock()
-    asyncio.set_event_loop_policy(
-        MonitoredAsyncIOSelectorEventLoopPolicy(monitor_callback=mock)
-    )
+    asyncio.set_event_loop_policy(ioloop_policy_class(monitor_callback=mock))
     block_for = 0.5
     asyncio.run(non_cpu_intensive_blocking_coroutine(block_for))
     (blocking_coroutine_monitor,) = mock.mock_calls[0].args

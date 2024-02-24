@@ -2,6 +2,7 @@ import asyncio
 import typing
 from asyncio import Handle
 
+from monitored_ioloop.monioted_ioloop_base import BaseMonitoredEventLoopPolicy
 from monitored_ioloop.monitoring import wrap_callback_with_monitoring
 from monitored_ioloop.types import IoLoopMonitorState
 
@@ -27,3 +28,20 @@ class MonitoredSelectorEventLoop(asyncio.SelectorEventLoop):
         )
 
         return super().call_soon(callback_with_monitoring, *args, **kwargs)
+
+
+class MonitoredAsyncIOEventLoopPolicy(BaseMonitoredEventLoopPolicy):
+    """Event loop policy.
+
+    The preferred way to make your application use monitored asyncio selector based ioloop:
+
+    >>> import asyncio
+    >>> import monitored_ioloop
+    >>> asyncio.set_event_loop_policy(monitored_ioloop.MonitoredAsyncIOEventLoopPolicy())
+    >>> asyncio.get_event_loop()
+    <uvloop.Loop running=False closed=False debug=False>
+    """
+
+    def _loop_factory(self) -> MonitoredSelectorEventLoop:
+        loop = MonitoredSelectorEventLoop(self._monitor_callback)
+        return loop
