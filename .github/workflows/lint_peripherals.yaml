@@ -46,7 +46,7 @@ jobs:
         run: poetry install --no-interaction --with $POETRY_GROUPS
 
       - name: Lint stress test code
-        run: make lint TARGET_DIR=stress_test
+        run: make lint TARGET_DIR=stress_tests
 
       - name: Lint tests code
         run: make lint TARGET_DIR=tests
