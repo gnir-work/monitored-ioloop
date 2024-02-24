@@ -35,7 +35,7 @@ jobs:
       - name: Create poetry groups cache key
         id: create-poetry-groups-cache-key
         run: |
-          echo "::set-env name=poetry_group_names::$(echo '${{ env.POETRY_GROUPS }}' | sed 's/,/-/g')"
+          echo poetry_groups_cache_key='${{ env.POETRY_GROUPS }}' | sed 's/,/-/g' >> $GITHUB_OUTPUT
       #----------------------------------------------
       #       load cached venv if cache exists
       #----------------------------------------------
@@ -44,7 +44,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}-${{ steps.create-poetry-groups-cache-key.outputs.poetry_group_names }}
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}-${{ steps.create-poetry-groups-cache-key.outputs.poetry_groups_cache_key }}
       #----------------------------------------------
       # install dependencies if cache does not exist
       #----------------------------------------------
