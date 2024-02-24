@@ -7,18 +7,22 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-prometheus-client = "^0.20.0"
 
 [tool.poetry.group.dev]
 optional = true
 
 [tool.poetry.group.dev.dependencies]
 ipython = "^8.21.0"
+requests = "^2.31.0"
 ipdb = "^0.13.13"
+
+[tool.poetry.group.code_quality]
+optional = true
+
+[tool.poetry.group.code_quality.dependencies]
 mypy = "^1.8.0"
 ruff = "^0.2.2"
 pytest = "^8.0.1"
-requests = "^2.31.0"
 pytest-cov = "^4.1.0"
 
 [tool.poetry.group.uvloop]

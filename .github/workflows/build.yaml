@@ -1,27 +1,28 @@
-name: Lint peripherals
+name: Deploy pypi package
 
-on: pull_request
+on:
+  push:
+    branches:
+      - main
+    tags-ignore:
+      - '*'
 
 env:
-  POETRY_GROUPS: uvloop,stress_test,code_quality
+  POETRY_GROUPS: uvloop
 
 jobs:
-  test:
-    strategy:
-      fail-fast: true
-      matrix:
-        os: [ "ubuntu-latest" ]
-        python-version: [ "3.11" ]
-    runs-on: ${{ matrix.os }}
+  version-bump:
+    name: Bump version
+    runs-on: ubuntu-latest
     steps:
-      - name: Check out repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up python ${{ matrix.python-version }}
+      - name: Set up python 3.11
         id: setup-python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: 3.11
 
       - name: Install Poetry
         uses: snok/install-poetry@v1
@@ -45,8 +46,22 @@ jobs:
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --no-interaction --with $POETRY_GROUPS
 
-      - name: Lint stress test code
-        run: make lint TARGET_DIR=stress_tests
+      - name: Bump version
+        run: |
+          poetry version patch
+          export VERSION=v$(poetry version -s)
+          git add pyproject.toml
+          git commit -m "bump up ${{ github.event.inputs.version }} version from workflow"
+          git tag ${VERSION}
+          git push 
+          git push origin ${VERSION}
 
-      - name: Lint tests code
-        run: make lint TARGET_DIR=tests
+      - name: Build package
+        run: |
+          poetry build
+
+      - name: Store the distribution packages
+        uses: actions/upload-artifact@v3
+        with:
+          name: python-package-distributions
+          path: dist/

@@ -1,9 +1,9 @@
 import enum
 import asyncio
 import uvloop
-from monitored_ioloop import (
-    MonitoredAsyncIOSelectorEventLoopPolicy,
-    MonitoredUvloopEventLoopPolicy,
+from monitored_ioloop.monitored_uvloop_ioloop import MonitoredUvloopEventLoopPolicy
+from monitored_ioloop.monitored_asyncio_ioloop import (
+    MonitoredAsyncIOEventLoopPolicy,
 )
 
 
@@ -24,5 +24,5 @@ def get_io_loop_policy_from_type(
     if ioloop_type == IOLoopType.monitored_uvloop:
         return MonitoredUvloopEventLoopPolicy
     if ioloop_type == IOLoopType.monitored_asyncio:
-        return MonitoredAsyncIOSelectorEventLoopPolicy
+        return MonitoredAsyncIOEventLoopPolicy
     raise ValueError(f"Unknown IOLoopType: {ioloop_type}")
