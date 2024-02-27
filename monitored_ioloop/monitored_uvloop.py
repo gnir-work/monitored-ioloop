@@ -26,7 +26,7 @@ class MonitoredUvloopEventLoop(uvloop.Loop):
     ):
         super().__init__(*args, **kwargs)
         self._monitor_callback = monitor_callback
-        self._state = IoLoopInnerState(total_handles=0)
+        self._state = IoLoopInnerState(handles_count=0)
 
     def call_soon(
         self,
