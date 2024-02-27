@@ -11,7 +11,7 @@ pip install monitored_io_loop[uvloop]  # For the the additional support of the u
 
 ### Usage asyncio
 ```python
-from monitored_ioloop import MonitoredAsyncIOEventLoopPolicy, IoLoopMonitorState
+from monitored_ioloop.monitored_asyncio import MonitoredAsyncIOEventLoopPolicy, IoLoopMonitorState
 import asyncio
 import time
 
@@ -32,7 +32,7 @@ def main():
 ### Usage uvloop
 In order to use the uvloop event loop, please make sure to install `monitored_io_loop[uvloop]`.
 ```python
-from monitored_ioloop import MonitoredUvloopEventLoopPolicy, IoLoopMonitorState
+from monitored_ioloop.monitored_uvloop import MonitoredUvloopEventLoopPolicy, IoLoopMonitorState
 import asyncio
 import time
 
