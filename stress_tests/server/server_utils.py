@@ -1,8 +1,8 @@
 import enum
 import asyncio
 import uvloop
-from monitored_ioloop.monitored_uvloop_ioloop import MonitoredUvloopEventLoopPolicy
-from monitored_ioloop.monitored_asyncio_ioloop import (
+from monitored_ioloop.monitored_uvloop import MonitoredUvloopEventLoopPolicy
+from monitored_ioloop.monitored_asyncio import (
     MonitoredAsyncIOEventLoopPolicy,
 )
 

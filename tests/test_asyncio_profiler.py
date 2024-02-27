@@ -8,8 +8,8 @@ from unittest.mock import Mock
 from monitored_ioloop.monioted_ioloop_base import (
     BaseMonitoredEventLoopPolicy,
 )
-from monitored_ioloop.monitored_uvloop_ioloop import MonitoredUvloopEventLoopPolicy
-from monitored_ioloop.monitored_asyncio_ioloop import (
+from monitored_ioloop.monitored_uvloop import MonitoredUvloopEventLoopPolicy
+from monitored_ioloop.monitored_asyncio import (
     MonitoredAsyncIOEventLoopPolicy,
 )
 from tests.utils import busy_wait, _check_monitor_result
