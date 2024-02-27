@@ -9,8 +9,11 @@ logger = getLogger(__name__)
 
 @dataclass
 class IoLoopMonitorState:
+    # The time it took to execute the loop in wall time (For example asyncio.sleep will also be recorded).
     wall_loop_duration: float
+    # The time it took to execute the loop in cpu time (For example asyncio.sleep will not be recorded).
     cpu_loop_duration: float
+    # The amount of handles in the loop - https://docs.python.org/3/library/asyncio-eventloop.html#callback-handles
     handles_count: int
 
 
