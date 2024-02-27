@@ -2,6 +2,10 @@ name: Lint peripherals
 
 on: pull_request
 
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+
 env:
   POETRY_GROUPS: stress_test,code_quality
 
