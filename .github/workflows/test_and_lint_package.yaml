@@ -1,6 +1,9 @@
 name: test
 
 on: pull_request
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
 
 env:
   POETRY_GROUPS: code_quality
@@ -50,8 +53,7 @@ jobs:
 
       - name: Run tests
         run: |
-          poetry run pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=monitored_ioloop tests/ | tee pytest-coverage.txt
-          poetry run pytest tests -n auto --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
+          poetry run pytest tests -n auto --junitxml=test-results.xml --cov=monitored_ioloop --cov-report=xml
 
       - name: Pytest coverage comment
         uses: MishaKav/pytest-coverage-comment@main
@@ -59,5 +61,5 @@ jobs:
           pytest-xml-coverage-path: ./coverage.xml
           unique-id-for-comment: pytest-coverage-report
           title: Pytest coverage report
-          junitxml-path: ./junit/test-results.xml
+          junitxml-path: ./test-results.xml
           junitxml-title: Pytest test summary
