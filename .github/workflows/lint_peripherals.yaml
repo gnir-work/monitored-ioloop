@@ -3,7 +3,7 @@ name: Lint peripherals
 on: pull_request
 
 env:
-  POETRY_GROUPS: uvloop,stress_test,code_quality
+  POETRY_GROUPS: stress_test,code_quality
 
 jobs:
   test:
@@ -43,7 +43,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --with $POETRY_GROUPS
+        run: poetry install --no-interaction --with $POETRY_GROUPS -E uvloop
 
       - name: Lint stress test code
         run: make lint TARGET_DIR=stress_tests
