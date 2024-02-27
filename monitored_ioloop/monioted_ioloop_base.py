@@ -1,6 +1,6 @@
 import typing
 from asyncio.events import BaseDefaultEventLoopPolicy
-from monitored_ioloop.types import IoLoopMonitorState
+from monitored_ioloop.monitoring import IoLoopMonitorState
 
 
 class BaseMonitoredEventLoopPolicy(BaseDefaultEventLoopPolicy):
