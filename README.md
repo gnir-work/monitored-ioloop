@@ -53,21 +53,11 @@ With every call you will receive an [IoLoopMonitorState](monitored_ioloop/types.
 
 
 ## Performance impact
-As many of you might be concerned about the performance impact of this library, I have run some benchmarks to measure the performance impact of this library.  
-After running the [following benchmarks](stress_tests) I can confidently say that the performance impact is negligible.  
-__Hardware__: Apple M1 Pro 2022 32GB RAM  
-__Vanilla asyncio__
-![Vanilla asyncio](stress_tests/results/asyncio.png)
-__Monitored asyncio__
-![Monitored asyncio](stress_tests/results/monitored_asyncio.png)
-
-__Vanilla uvloop__
-![Vanilla uvloop](stress_tests/results/uvloop.png)
-__Monitored uvloop__
-![Monitored uvloop](stress_tests/results/monitored_uvloop.png)
+As many of you might be concerned about the performance impact of this library, I have run some benchmarks to measure the performance impact of this library.    
+You can find the results in the [following README](stress_tests/results/README.md) folder.
 
 ## Roadmap
-- [ ] Add support for the amount of `Handle`'s on the event loop
+- [x] Add support for the amount of `Handle`'s on the event loop
 - [ ] Add visibility into which `Handle` are making the event loop slower
 - [ ] Add easier integration with popular monitoring tools like Prometheus
 - [ ] Add easier integration with `uvicorn`

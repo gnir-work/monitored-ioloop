@@ -10,4 +10,4 @@ run-stress-test:
 ifndef OUTPUT_FILE
 	$(error OUTPUT_FILE is not defined)
 endif
-	poetry run locust --users 500 --spawn-rate 100 -t 15 --headless --process 4 --html ${OUTPUT_FILE}
+	poetry run locust --users 1000 --spawn-rate 250 -t 15 --headless --process 4 --csv ${OUTPUT_FILE}
