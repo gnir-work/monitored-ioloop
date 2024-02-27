@@ -15,4 +15,4 @@ class FastAPIUser(HttpUser):
 
     @task
     def async_slow(self) -> None:
-        self.client.get("/async_slow?sleep_for=5")
+        self.client.get("/async_slow?sleep_for=5&coroutines_number=10")

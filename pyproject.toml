@@ -28,6 +28,7 @@ mypy = "^1.8.0"
 ruff = "^0.2.2"
 pytest = "^8.0.1"
 pytest-cov = "^4.1.0"
+pytest-xdist = "^3.5.0"
 
 [tool.poetry.group.stress_test]
 optional = true
