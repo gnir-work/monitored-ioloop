@@ -9,6 +9,6 @@ The stress tests library used was `locust` with the following parameters:
 * 15 seconds of test duration
 
 ### Results summary
-Both for `uvloop` and `asyncio` you can expect the following:
+Both for `uvloop` and `asyncio` you can expect the following under heavy load (200+ request/second):
 * until the 80th percentile (inclusive) there is no significant difference in the response time between monitored and vanilla loops.
 * after the 90th percentile (inclusive) you can expect a 5-10% increase in response time for monitored loops.

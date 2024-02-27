@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - monitored_ioloop/**
+      - pyproject.toml
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
