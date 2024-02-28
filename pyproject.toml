@@ -39,6 +39,15 @@ uvicorn = "^0.27.1"
 click = "^8.1.7"
 locust = "^2.23.1"
 
+[tool.poetry.group.examples]
+optional = true
+
+[tool.poetry.group.examples.dependencies]
+fastapi = "^0.109.2"
+prometheus-client = "^0.20.0"
+httpx = "^0.27.0"
+
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
