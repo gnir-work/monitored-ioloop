@@ -52,17 +52,23 @@ With every call you will receive an [IoLoopMonitorState](monitored_ioloop/monito
 - `cpu_loop_duration`: The time it took to execute the current step of the event loop in CPU time.
 - `handles_count`: The amount of handles (think about them as tasks) that the IO loop is currently handling.
 
-
 ## Performance impact
-As many of you might be concerned about the performance impact of this library, I have run some benchmarks to measure the performance impact of this library.    
-You can find the results in the [following README](stress_tests/results/README.md) folder.
+As many of you might be concerned about the performance impact of this library, I have run some benchmarks to measure the performance impact of this library.  
+In summary the performance impact is negligible for most use cases.  
+You can find the more detailed information in the following [README.md](stress_tests/results/README.md).
+
+## Usage examples
+You can find examples projects showing potential use cases in the [examples](examples) folder.  
+Currently there is only the [fastapi with prometheus exporter example](examples/fastapi_with_prometheus) but more will be added in the future.
+
 
 ## Roadmap
 - [x] Add support for the amount of `Handle`'s on the event loop
+- [x] Add an examples folder
 - [ ] Add visibility into which `Handle` are making the event loop slower
 - [ ] Add easier integration with popular monitoring tools like Prometheus
 - [ ] Add easier integration with `uvicorn`
-- [ ] Add an examples folder
+
 
 ## Credits
 I took a lot of inspiration from the [uvloop](https://github.com/MagicStack/uvloop) project with everythin
