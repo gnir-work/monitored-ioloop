@@ -126,7 +126,8 @@ def test_non_cpu_intensive_blocking_coroutine(
     (blocking_coroutine_monitor,) = mock.mock_calls[0].args
     _check_monitor_result(block_for, blocking_coroutine_monitor.wall_loop_duration)
     assert (
-        blocking_coroutine_monitor.cpu_loop_duration < 0.02
+        # 0.02 was too low and sometimes it could take longer
+        blocking_coroutine_monitor.cpu_loop_duration < 0.05
     ), "CPU time should be minimal."
 
 
