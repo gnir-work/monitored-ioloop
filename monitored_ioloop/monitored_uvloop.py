@@ -31,7 +31,7 @@ class MonitoredUvloopEventLoop(uvloop.Loop):
     def call_soon(
         self,
         callback: typing.Callable[..., typing.Any],
-        *args: typing.Any,
+        *args: typing.Any,  # type: ignore
         **kwargs: typing.Any,
     ) -> Handle:
         callback_with_monitoring = wrap_callback_with_monitoring(
