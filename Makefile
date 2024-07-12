@@ -21,3 +21,6 @@ pre-commit: format lint-static-code-analysis
 
 test:
 	poetry run pytest --cov=monitored_ioloop -n auto tests
+
+test-for-flakiness:
+	poetry run pytest --cov=monitored_ioloop -n auto --count=10

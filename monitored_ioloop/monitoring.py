@@ -9,12 +9,34 @@ logger = getLogger(__name__)
 
 @dataclass
 class IoLoopMonitorState:
-    # The time it took to execute the loop in wall time (For example asyncio.sleep will also be recorded).
-    wall_loop_duration: float
-    # The time it took to execute the loop in cpu time (For example asyncio.sleep will not be recorded).
-    cpu_loop_duration: float
-    # The amount of handles in the loop - https://docs.python.org/3/library/asyncio-eventloop.html#callback-handles
-    handles_count: int
+    """
+    A dataclass containing the state of the loop when the callback was executed.
+    This class is the interface that the monitor callback will receive.
+
+    A basic Lexicon:
+    * Handle - A wrapper for a callback that is scheduled to be executed by the loop.
+    * Callback - The function that is executed by the loop.
+    * Loop - The event loop that is executing the callbacks.
+    """
+
+    """
+    Wall executing time of the callback
+    It can be the whole coroutine or parts of it, depending on if the executing control
+    was delegated back the loop or not.
+
+    Wall Time explanation - https://en.wikipedia.org/wiki/Wall-clock_time
+    """
+    callback_wall_time: float
+
+    """
+    The amount of handles in the loop, excluding the current one.
+    """
+    loop_handles_count: int
+
+    """
+    The amount of time it took from the moment the coroutine was added to the loop until it was executed.
+    """
+    loop_lag: float
 
 
 @dataclass
@@ -48,21 +70,21 @@ def wrap_callback_with_monitoring(
     back to the monitor_callback.
     """
     ioloop_state.increase_handles_count_thread_safe(1)
+    added_to_loop_time = time.perf_counter()
 
     def wrapper(*inner_args: typing.Any, **inner_kwargs: typing.Any) -> typing.Any:
-        start_wall_time = time.time()
-        start_cpu_time = time.process_time()
+        loop_lag = time.perf_counter() - added_to_loop_time
+        start_wall_time = time.perf_counter()
         response = callback(*inner_args, **inner_kwargs)
         ioloop_state.decrease_handles_count_thread_safe(1)
-        wall_duration = time.time() - start_wall_time
-        cpu_duration = time.process_time() - start_cpu_time
+        wall_duration = time.perf_counter() - start_wall_time
 
         try:
             monitor_callback(
                 IoLoopMonitorState(
-                    wall_loop_duration=wall_duration,
-                    cpu_loop_duration=cpu_duration,
-                    handles_count=ioloop_state.handles_count,
+                    callback_wall_time=wall_duration,
+                    loop_handles_count=ioloop_state.handles_count,
+                    loop_lag=loop_lag,
                 )
             )
         except Exception:

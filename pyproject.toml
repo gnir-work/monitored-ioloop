@@ -6,7 +6,7 @@ authors = ["gnir <gnir.work@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 uvloop = { version ="^0.19.0", optional = true }
 
 [tool.poetry.extras]
@@ -24,11 +24,12 @@ ipdb = "^0.13.13"
 optional = true
 
 [tool.poetry.group.code_quality.dependencies]
-mypy = "^1.8.0"
-ruff = "^0.2.2"
+mypy = "^1.10.1"
+ruff = "^0.5.1"
 pytest = "^8.0.1"
 pytest-cov = "^4.1.0"
 pytest-xdist = "^3.5.0"
+pytest-repeat = "^0.9.3"
 
 [tool.poetry.group.stress_test]
 optional = true
