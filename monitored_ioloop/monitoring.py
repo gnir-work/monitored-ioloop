@@ -59,31 +59,30 @@ class IoLoopInnerState:
             self.handles_count -= decrease_by
 
 
-def wrap_callback_with_monitoring(
-    callback: typing.Callable[..., typing.Any],
-    monitor_callback: typing.Callable[[IoLoopMonitorState], None],
-    ioloop_state: IoLoopInnerState,
-) -> typing.Callable[..., typing.Any]:
-    """
-    Add monitoring to a callback.
-    The callback will be wrapped in a function that will monitor the callbacks execution time and report
-    back to the monitor_callback.
-    """
-    ioloop_state.increase_handles_count_thread_safe(1)
-    added_to_loop_time = time.perf_counter()
+class MonitoredCallback:
+    def __init__(
+        self,
+        callback: typing.Callable[[IoLoopMonitorState], None],
+        monitor_callback: typing.Callable[[IoLoopMonitorState], None],
+        io_loop_state: IoLoopInnerState,
+    ):
+        self._callback_to_monitor = callback
+        self._original_callback = monitor_callback
+        self._ioloop_state = io_loop_state
+        self._added_to_loop_time = time.perf_counter()
 
-    def wrapper(*inner_args: typing.Any, **inner_kwargs: typing.Any) -> typing.Any:
-        loop_lag = time.perf_counter() - added_to_loop_time
+    def __call__(self, *args: typing.Any, **kwargs: typing.Any) -> typing.Any:
+        loop_lag = time.perf_counter() - self._added_to_loop_time
         start_wall_time = time.perf_counter()
-        response = callback(*inner_args, **inner_kwargs)
-        ioloop_state.decrease_handles_count_thread_safe(1)
+        response = self._callback_to_monitor(*args, **kwargs)
+        self._ioloop_state.decrease_handles_count_thread_safe(1)
         wall_duration = time.perf_counter() - start_wall_time
 
         try:
-            monitor_callback(
+            self._original_callback(
                 IoLoopMonitorState(
                     callback_wall_time=wall_duration,
-                    loop_handles_count=ioloop_state.handles_count,
+                    loop_handles_count=self._ioloop_state.handles_count,
                     loop_lag=loop_lag,
                 )
             )
@@ -91,4 +90,14 @@ def wrap_callback_with_monitoring(
             logger.warning("Monitor callback failed.", exc_info=True)
         return response
 
-    return wrapper
+    def __getattr__(self, item: str) -> typing.Any:
+        return getattr(self._callback_to_monitor, item)
+
+
+def wrap_callback_with_monitoring(
+    callback: typing.Callable[..., typing.Any],
+    monitor_callback: typing.Callable[[IoLoopMonitorState], None],
+    ioloop_state: IoLoopInnerState,
+) -> typing.Callable[..., typing.Any]:
+    ioloop_state.increase_handles_count_thread_safe(1)
+    return MonitoredCallback(callback, monitor_callback, ioloop_state)
