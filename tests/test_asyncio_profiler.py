@@ -213,3 +213,93 @@ def test_loop_lag(
         )
         == non_blocking_coroutines_count
     )
+
+
+@pytest.mark.parametrize(
+    "ioloop_policy_class",
+    [MonitoredAsyncIOEventLoopPolicy, MonitoredUvloopEventLoopPolicy],
+)
+def test_callback_pretty_name__basic_top_level_coroutine_name(
+    ioloop_policy_class: typing.Type[MonitoredUvloopEventLoopPolicy],
+) -> None:
+    mock = Mock()
+    asyncio.set_event_loop_policy(ioloop_policy_class(monitor_callback=mock))
+    asyncio.run(non_cpu_intensive_blocking_coroutine(0.1))
+    assert (
+        len(
+            [
+                callback_pretty_name
+                for call in mock.mock_calls
+                if "non_cpu_intensive_blocking_coroutine"
+                in (callback_pretty_name := call.args[0].callback_pretty_name)
+            ]
+        )
+        == 1
+    )
+
+
+async def several_coroutines_in_gather_with_pretty_name_testing() -> None:
+    async def first_function() -> None:
+        time.sleep(0.1)
+
+    async def second_function() -> None:
+        time.sleep(0.1)
+
+    await asyncio.gather(
+        first_function(),
+        first_function(),
+        second_function(),
+    )
+
+
+@pytest.mark.parametrize(
+    "ioloop_policy_class",
+    [MonitoredAsyncIOEventLoopPolicy, MonitoredUvloopEventLoopPolicy],
+)
+def test_callback_pretty_name__several_coroutines_with_gather(
+    ioloop_policy_class: typing.Type[MonitoredUvloopEventLoopPolicy],
+) -> None:
+    mock = Mock()
+    asyncio.set_event_loop_policy(ioloop_policy_class(monitor_callback=mock))
+    asyncio.run(several_coroutines_in_gather_with_pretty_name_testing())
+
+    # The function is called twice from the ioloop, once until the gather and once after the gather has finished
+    assert (
+        len(
+            [
+                callback_pretty_name
+                for call in mock.mock_calls
+                if (
+                    "several_coroutines_in_gather_with_pretty_name_testing"
+                    in (callback_pretty_name := call.args[0].callback_pretty_name)
+                    and "first_function" not in callback_pretty_name
+                    and "second_function" not in callback_pretty_name
+                )
+            ]
+        )
+        == 2
+    )
+
+    assert (
+        len(
+            [
+                callback_pretty_name
+                for call in mock.mock_calls
+                if "first_function"
+                in (callback_pretty_name := call.args[0].callback_pretty_name)
+            ]
+        )
+        == 2
+    )
+
+    assert (
+        len(
+            [
+                callback_pretty_name
+                for call in mock.mock_calls
+                if "second_function"
+                in (callback_pretty_name := call.args[0].callback_pretty_name)
+            ]
+        )
+        == 1
+    )

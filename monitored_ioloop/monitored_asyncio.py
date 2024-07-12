@@ -31,7 +31,9 @@ class MonitoredSelectorEventLoop(asyncio.SelectorEventLoop):
             callback, self._monitor_callback, self._state
         )
 
-        return super().call_soon(callback_with_monitoring, *args, **kwargs)
+        handle = super().call_soon(callback_with_monitoring, *args, **kwargs)
+        callback_with_monitoring.set_handle(handle)
+        return handle
 
 
 class MonitoredAsyncIOEventLoopPolicy(BaseMonitoredEventLoopPolicy):
