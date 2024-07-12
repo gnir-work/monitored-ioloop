@@ -29,9 +29,9 @@ async def main() -> None:
 
 
 def monitor(ioloop_monitor_state: IoLoopMonitorState) -> None:
-    if ioloop_monitor_state.wall_task_time > 0.1:
+    if ioloop_monitor_state.callback_wall_time > 0.1:
         logger.warning(
-            f"Blocking operation detected, executing took: {ioloop_monitor_state.wall_task_time}"
+            f"Blocking operation detected, executing took: {ioloop_monitor_state.callback_wall_time}"
         )
     if ioloop_monitor_state.loop_lag > 0.1:
         logger.warning(

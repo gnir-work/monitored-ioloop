@@ -36,7 +36,7 @@ async def blocking_io_slow(sleep_for: int) -> str:
 
 
 def monitor(state: IoLoopMonitorState) -> None:
-    if state.wall_task_time > 0.1:
+    if state.callback_wall_time > 0.1:
         print(state)
 
 
