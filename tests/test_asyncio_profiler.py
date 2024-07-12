@@ -12,7 +12,7 @@ from monitored_ioloop.monitored_uvloop import MonitoredUvloopEventLoopPolicy
 from monitored_ioloop.monitored_asyncio import (
     MonitoredAsyncIOEventLoopPolicy,
 )
-from tests.utils import busy_wait, _check_monitor_result
+from tests.utils import busy_wait, _assert_monitor_result, _check_monitor_result
 
 
 async def blocking_coroutine(block_for: float) -> None:
@@ -32,7 +32,7 @@ def test_simple_blocking_coroutine(
     asyncio.run(blocking_coroutine(block_for))
     print(mock.mock_calls)
     (blocking_coroutine_monitor,) = mock.mock_calls[0].args
-    _check_monitor_result(block_for, blocking_coroutine_monitor.wall_task_time)
+    _assert_monitor_result(block_for, blocking_coroutine_monitor.wall_task_time)
     assert (
         mock.mock_calls[0].args[0].handles_count == 1
     ), "Initial handles count should be 1."
@@ -78,8 +78,8 @@ def test_complex_blocking_coroutine(
     asyncio.run(complex_blocking_coroutine(block_for))
     (first_blocking_section,) = mock.mock_calls[0].args
     (second_blocking_section,) = mock.mock_calls[1].args
-    _check_monitor_result(block_for, first_blocking_section.wall_task_time)
-    _check_monitor_result(block_for, second_blocking_section.wall_task_time)
+    _assert_monitor_result(block_for, first_blocking_section.wall_task_time)
+    _assert_monitor_result(block_for, second_blocking_section.wall_task_time)
 
 
 async def run_blocking_coroutine_in_task(block_for: float) -> None:
@@ -99,7 +99,7 @@ def test_task_blocking_coroutine(
     block_for = 0.5
     asyncio.run(run_blocking_coroutine_in_task(block_for))
     (blocking_coroutine_monitor,) = mock.mock_calls[1].args
-    _check_monitor_result(block_for, blocking_coroutine_monitor.wall_task_time)
+    _assert_monitor_result(block_for, blocking_coroutine_monitor.wall_task_time)
 
 
 async def non_cpu_intensive_blocking_coroutine(block_time: float) -> None:
@@ -118,7 +118,7 @@ def test_non_cpu_intensive_blocking_coroutine(
     block_for = 0.5
     asyncio.run(non_cpu_intensive_blocking_coroutine(block_for))
     (blocking_coroutine_monitor,) = mock.mock_calls[0].args
-    _check_monitor_result(block_for, blocking_coroutine_monitor.wall_task_time)
+    _assert_monitor_result(block_for, blocking_coroutine_monitor.wall_task_time)
 
 
 async def exception_raising_coroutine() -> None:
@@ -144,11 +144,22 @@ def test_handles_count_decreases_even_if_handle_raises_exception(
     ), "Handles count should drop to 0."
 
 
-async def multiple_coroutines() -> None:
+async def multiple_coroutines_partly_blocking(
+    blocking_count: int,
+    non_blocking_count: int,
+) -> None:
     async def sleep() -> None:
         await asyncio.sleep(0.1)
 
-    await asyncio.gather(sleep(), sleep(), sleep())
+    async def blocking_sleep() -> None:
+        time.sleep(0.2)
+
+    await asyncio.gather(
+        *(
+            [blocking_sleep() for _ in range(blocking_count)]
+            + [sleep() for _ in range(non_blocking_count)]
+        )
+    )
 
 
 @pytest.mark.parametrize(
@@ -160,10 +171,45 @@ def test_handles_count_with_multiple_coroutines(
 ) -> None:
     mock = Mock()
     asyncio.set_event_loop_policy(ioloop_policy_class(monitor_callback=mock))
-    asyncio.run(multiple_coroutines())
+    asyncio.run(
+        multiple_coroutines_partly_blocking(blocking_count=0, non_blocking_count=3)
+    )
     assert (
         mock.mock_calls[0].args[0].handles_count == 3
     ), "After the first handle finishes we should have 3 sleep coroutines running."
     assert (
         mock.mock_calls[-1].args[0].handles_count == 0
     ), "Handles count should drop to 0."
+
+
+@pytest.mark.parametrize(
+    "ioloop_policy_class",
+    [MonitoredAsyncIOEventLoopPolicy, MonitoredUvloopEventLoopPolicy],
+)
+def test_loop_lag(
+    ioloop_policy_class: typing.Type[MonitoredUvloopEventLoopPolicy],
+) -> None:
+    mock = Mock()
+    asyncio.set_event_loop_policy(ioloop_policy_class(monitor_callback=mock))
+    non_blocking_coroutines_count = 4
+    blocking_coroutines_count = 1
+    asyncio.run(
+        multiple_coroutines_partly_blocking(
+            blocking_count=blocking_coroutines_count,
+            non_blocking_count=non_blocking_coroutines_count,
+        )
+    )
+    assert (
+        mock.mock_calls[0].args[0].handles_count
+        == non_blocking_coroutines_count + blocking_coroutines_count
+    ), "After the first handle finishes all coroutines should be registered."
+    assert (
+        len(
+            [
+                call
+                for call in mock.mock_calls
+                if _check_monitor_result(0.2, call.args[0].loop_lag)
+            ]
+        )
+        == non_blocking_coroutines_count
+    )
