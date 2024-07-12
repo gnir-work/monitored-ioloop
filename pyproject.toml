@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "monitored_ioloop"
-version = "0.0.7"
+version = "0.0.8"
 description = ""
 authors = ["gnir <gnir.work@gmail.com>"]
 readme = "README.md"
