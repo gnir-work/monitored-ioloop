@@ -23,10 +23,9 @@ async def ping() -> str:
 
 
 @app.get("/async_slow")
-async def async_slow(sleep_for: int) -> str:
-    for _ in range(sleep_for):
-        await asyncio.sleep(1)
-    return f"slept for {sleep_for} seconds"
+async def async_slow(sleep_for: int, coroutines_number: int) -> str:
+    await asyncio.gather(*[asyncio.sleep(sleep_for) for _ in range(coroutines_number)])
+    return f"slept for {sleep_for} seconds and created {coroutines_number} coroutines"
 
 
 @app.get("/blocking_io_slow")
