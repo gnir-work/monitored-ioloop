@@ -46,7 +46,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --with $POETRY_GROUPS -E uvloop
+        run: make install POETRY_GROUPS=$POETRY_GROUPS
 
       - name: Lint code
         run: make lint TARGET_DIR=monitored_ioloop
