@@ -51,6 +51,8 @@ With every call you will receive an [IoLoopMonitorState](monitored_ioloop/monito
 - `callback_wall_time`: Wall executing time of the callback.
 - `loop_handles_count`: The amount of handles (think about them as tasks) that the IO loop is currently handling.
 - `loop_lag`: The amount of time it took from the moment the task was added to the loop until it was executed.
+- `callback_pretty_name`: The pretty name of the callback that was executed  
+__Please Note__: This is a best effort, the name of the callback may still be of little help, depending on the specific callback implementation.
 
 ## Performance impact
 As many of you might be concerned about the performance impact of this library, I have run some benchmarks to measure the performance impact of this library.  
@@ -66,7 +68,7 @@ Currently there is only the [fastapi with prometheus exporter example](examples/
 - [x] Add support for the amount of `Handle`'s on the event loop
 - [x] Add an examples folder
 - [x] Add loop lag metric (Inspired from nodejs loop monitoring)
-- [ ] Add visibility into which `Handle` are making the event loop slower
+- [x] Add visibility into which `Handle` are making the event loop slower
 - [ ] Add easier integration with `uvicorn`
 - [ ] Add easier integration with popular monitoring tools like Prometheus
 
