@@ -9,10 +9,8 @@ logger = getLogger(__name__)
 
 @dataclass
 class IoLoopMonitorState:
-    # The time it took to execute the loop in wall time (For example asyncio.sleep will also be recorded).
-    wall_loop_duration: float
-    # The time it took to execute the loop in cpu time (For example asyncio.sleep will not be recorded).
-    cpu_loop_duration: float
+    # The time it took to execute the callback in wall clock time - https://en.wikipedia.org/wiki/Wall-clock_time
+    wall_task_time: float
     # The amount of handles in the loop - https://docs.python.org/3/library/asyncio-eventloop.html#callback-handles
     handles_count: int
 
@@ -51,17 +49,14 @@ def wrap_callback_with_monitoring(
 
     def wrapper(*inner_args: typing.Any, **inner_kwargs: typing.Any) -> typing.Any:
         start_wall_time = time.time()
-        start_cpu_time = time.process_time()
         response = callback(*inner_args, **inner_kwargs)
         ioloop_state.decrease_handles_count_thread_safe(1)
         wall_duration = time.time() - start_wall_time
-        cpu_duration = time.process_time() - start_cpu_time
 
         try:
             monitor_callback(
                 IoLoopMonitorState(
-                    wall_loop_duration=wall_duration,
-                    cpu_loop_duration=cpu_duration,
+                    wall_task_time=wall_duration,
                     handles_count=ioloop_state.handles_count,
                 )
             )

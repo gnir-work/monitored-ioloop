@@ -32,10 +32,7 @@ def test_simple_blocking_coroutine(
     asyncio.run(blocking_coroutine(block_for))
     print(mock.mock_calls)
     (blocking_coroutine_monitor,) = mock.mock_calls[0].args
-    _check_monitor_result(block_for, blocking_coroutine_monitor.wall_loop_duration)
-    _check_monitor_result(
-        block_for, blocking_coroutine_monitor.cpu_loop_duration, threshold=0.15
-    )
+    _check_monitor_result(block_for, blocking_coroutine_monitor.wall_task_time)
     assert (
         mock.mock_calls[0].args[0].handles_count == 1
     ), "Initial handles count should be 1."
@@ -81,10 +78,8 @@ def test_complex_blocking_coroutine(
     asyncio.run(complex_blocking_coroutine(block_for))
     (first_blocking_section,) = mock.mock_calls[0].args
     (second_blocking_section,) = mock.mock_calls[1].args
-    _check_monitor_result(block_for, first_blocking_section.wall_loop_duration)
-    _check_monitor_result(block_for, second_blocking_section.wall_loop_duration)
-    _check_monitor_result(block_for, first_blocking_section.cpu_loop_duration)
-    _check_monitor_result(block_for, second_blocking_section.cpu_loop_duration)
+    _check_monitor_result(block_for, first_blocking_section.wall_task_time)
+    _check_monitor_result(block_for, second_blocking_section.wall_task_time)
 
 
 async def run_blocking_coroutine_in_task(block_for: float) -> None:
@@ -104,8 +99,7 @@ def test_task_blocking_coroutine(
     block_for = 0.5
     asyncio.run(run_blocking_coroutine_in_task(block_for))
     (blocking_coroutine_monitor,) = mock.mock_calls[1].args
-    _check_monitor_result(block_for, blocking_coroutine_monitor.wall_loop_duration)
-    _check_monitor_result(block_for, blocking_coroutine_monitor.cpu_loop_duration)
+    _check_monitor_result(block_for, blocking_coroutine_monitor.wall_task_time)
 
 
 async def non_cpu_intensive_blocking_coroutine(block_time: float) -> None:
@@ -124,11 +118,7 @@ def test_non_cpu_intensive_blocking_coroutine(
     block_for = 0.5
     asyncio.run(non_cpu_intensive_blocking_coroutine(block_for))
     (blocking_coroutine_monitor,) = mock.mock_calls[0].args
-    _check_monitor_result(block_for, blocking_coroutine_monitor.wall_loop_duration)
-    assert (
-        # 0.02 was too low and sometimes it could take longer
-        blocking_coroutine_monitor.cpu_loop_duration < 0.05
-    ), "CPU time should be minimal."
+    _check_monitor_result(block_for, blocking_coroutine_monitor.wall_task_time)
 
 
 async def exception_raising_coroutine() -> None:

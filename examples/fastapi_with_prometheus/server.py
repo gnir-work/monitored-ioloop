@@ -34,7 +34,7 @@ async def blocking_slow(sleep_for: int) -> str:
 
 
 def monitor_ioloop(ioloop_monitor_state: IoLoopMonitorState) -> None:
-    ioloop_execution_time_histogram.observe(ioloop_monitor_state.wall_loop_duration)
+    ioloop_execution_time_histogram.observe(ioloop_monitor_state.wall_task_time)
 
 
 def main() -> None:
