@@ -5,7 +5,7 @@ import typing
 import pytest
 from unittest.mock import Mock
 
-from monitored_ioloop.monioted_ioloop_base import (
+from monitored_ioloop.monitored_ioloop_base import (
     BaseMonitoredEventLoopPolicy,
 )
 from monitored_ioloop.monitored_uvloop import MonitoredUvloopEventLoopPolicy

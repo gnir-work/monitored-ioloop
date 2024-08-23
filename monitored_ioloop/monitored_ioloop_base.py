@@ -16,6 +16,8 @@ class BaseMonitoredEventLoopPolicy(BaseDefaultEventLoopPolicy):
         # as abstract in typeshed, we have to put them in so mypy thinks
         # the base methods are overridden. This is the same approach taken
         # for the Windows event loop policy classes in typeshed.
+        # pragma: no cover
         def get_child_watcher(self) -> typing.NoReturn: ...
 
+        # pragma: no cover
         def set_child_watcher(self, watcher: typing.Any) -> typing.NoReturn: ...
