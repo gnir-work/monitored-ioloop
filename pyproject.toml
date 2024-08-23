@@ -20,10 +20,14 @@ ruff = "^0.2.2"
 pytest = "^8.0.1"
 requests = "^2.31.0"
 
+[tool.poetry.group.uvloop]
+optional = true
 
 [tool.poetry.group.uvloop.dependencies]
 uvloop = "^0.19.0"
 
+[tool.poetry.group.stress_test]
+optional = true
 
 [tool.poetry.group.stress_test.dependencies]
 fastapi = "^0.109.2"
