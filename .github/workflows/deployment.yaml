@@ -59,6 +59,8 @@ jobs:
           git add pyproject.toml
           git commit -m "bumping from version ${{ steps.version-bump.outputs.current_version }} to version ${{ steps.version-bump.outputs.new_version }} from workflow"
           git push 
+          git tag v${{ steps.version-bump.outputs.new_version }}
+          git push origin v${{ steps.version-bump.outputs.new_version }}
 
       - name: Build package
         run: |
