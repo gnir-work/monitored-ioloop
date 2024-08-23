@@ -13,6 +13,8 @@ class IoLoopMonitorState:
     wall_task_time: float
     # The amount of handles in the loop - https://docs.python.org/3/library/asyncio-eventloop.html#callback-handles
     handles_count: int
+    # The time passed from the time the coroutine was added to the loop until it was executed.
+    loop_lag: float
 
 
 @dataclass
@@ -46,18 +48,21 @@ def wrap_callback_with_monitoring(
     back to the monitor_callback.
     """
     ioloop_state.increase_handles_count_thread_safe(1)
+    added_to_loop_time = time.perf_counter()
 
     def wrapper(*inner_args: typing.Any, **inner_kwargs: typing.Any) -> typing.Any:
-        start_wall_time = time.time()
+        loop_lag = time.perf_counter() - added_to_loop_time
+        start_wall_time = time.perf_counter()
         response = callback(*inner_args, **inner_kwargs)
         ioloop_state.decrease_handles_count_thread_safe(1)
-        wall_duration = time.time() - start_wall_time
+        wall_duration = time.perf_counter() - start_wall_time
 
         try:
             monitor_callback(
                 IoLoopMonitorState(
                     wall_task_time=wall_duration,
                     handles_count=ioloop_state.handles_count,
+                    loop_lag=loop_lag,
                 )
             )
         except Exception:
