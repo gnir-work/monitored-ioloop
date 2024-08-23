@@ -2097,9 +2097,10 @@ test = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 
 [extras]
+fastapi = []
 uvloop = ["uvloop"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "9bb9fd7cde2114816b54ca8f41fc2715a559590b65a6d9b985cf48f794535d77"
+content-hash = "ffe52a4589bab2663e687a440ae2aa94883bb2226e434d30055f48194f504e43"
