@@ -1,8 +1,8 @@
 TARGET_DIR = .
-POETRY_GROUPS = dev,uvloop,stress_test,code_quality
+POETRY_GROUPS = dev,stress_test,code_quality
 
 install:
-	poetry install --with ${POETRY_GROUPS}
+	poetry install --with ${POETRY_GROUPS} -E uvloop
 
 format:
 	poetry run ruff format ${TARGET_DIR}

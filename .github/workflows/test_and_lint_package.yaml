@@ -3,7 +3,7 @@ name: test
 on: pull_request
 
 env:
-  POETRY_GROUPS: uvloop,code_quality
+  POETRY_GROUPS: code_quality
 
 jobs:
   test:
@@ -43,7 +43,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --with $POETRY_GROUPS
+        run: poetry install --no-interaction --with $POETRY_GROUPS -E uvloop
 
       - name: Lint code
         run: make lint TARGET_DIR=monitored_ioloop
