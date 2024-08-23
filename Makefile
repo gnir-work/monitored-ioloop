@@ -20,4 +20,4 @@ lint: lint-formatters lint-static-code-analysis
 pre-commit: format lint-static-code-analysis
 
 test:
-	poetry run pytest tests
+	poetry run pytest --cov=monitored_ioloop -n auto tests

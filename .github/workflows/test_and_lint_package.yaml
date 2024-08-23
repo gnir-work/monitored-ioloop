@@ -50,4 +50,14 @@ jobs:
 
       - name: Run tests
         run: |
-          poetry run pytest tests --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
+          poetry run pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=monitored_ioloop tests/ | tee pytest-coverage.txt
+          poetry run pytest tests -n auto --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
+
+      - name: Pytest coverage comment
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          pytest-xml-coverage-path: ./coverage.xml
+          unique-id-for-comment: pytest-coverage-report
+          title: Pytest coverage report
+          junitxml-path: ./junit/test-results.xml
+          junitxml-title: Pytest test summary
