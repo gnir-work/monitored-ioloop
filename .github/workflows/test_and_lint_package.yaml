@@ -3,7 +3,7 @@ name: test
 on: pull_request
 
 env:
-  POETRY_GROUPS: dev,uvloop
+  POETRY_GROUPS: uvloop,code_quality
 
 jobs:
   test:
