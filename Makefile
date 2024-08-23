@@ -1,5 +1,5 @@
 TARGET_DIR = .
-POETRY_GROUPS = dev,stress_test,code_quality
+POETRY_GROUPS = dev,stress_test,code_quality,examples
 
 install:
 	poetry install --with ${POETRY_GROUPS} -E uvloop

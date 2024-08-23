@@ -7,7 +7,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
 
 env:
-  POETRY_GROUPS: stress_test,code_quality
+  POETRY_GROUPS: stress_test,code_quality,examples
 
 jobs:
   test:
@@ -54,3 +54,6 @@ jobs:
 
       - name: Lint tests code
         run: make lint TARGET_DIR=tests
+
+      - name: Lint tests examples
+        run: make lint TARGET_DIR=examples
