@@ -3,7 +3,7 @@ from monitored_ioloop.exceptions import NoUvLoopInstalled
 try:
     import uvloop
 except ImportError:
-    raise NoUvLoopInstalled()
+    raise NoUvLoopInstalled() from None
 
 import typing
 
