@@ -47,9 +47,10 @@ The usage is the same as the asyncio event loop, but with `monitored_ioloop.moni
 
 ## The monitor callback
 The monitor callback will be called for every execution that the event loop initiates.  
-With every call you will receive an [IoLoopMonitorState](monitored_ioloop/types.py) object that contains the following information:
+With every call you will receive an [IoLoopMonitorState](monitored_ioloop/monitoring.py) object that contains the following information:
 - `wall_loop_duration`: The time it took to execute the current step of the event loop in wall time.
 - `cpu_loop_duration`: The time it took to execute the current step of the event loop in CPU time.
+- `handles_count`: The amount of handles (think about them as tasks) that the IO loop is currently handling.
 
 
 ## Performance impact
