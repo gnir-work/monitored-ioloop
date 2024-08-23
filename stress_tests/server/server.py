@@ -9,7 +9,7 @@ from monitored_ioloop.monioted_ioloop_base import (
 )
 from uvicorn import Config, Server
 
-from monitored_ioloop.types import IoLoopMonitorState
+from monitored_ioloop.monitoring import IoLoopMonitorState
 from stress_tests.server.server_utils import IOLoopType
 
 from stress_tests.server.server_utils import get_io_loop_policy_from_type
