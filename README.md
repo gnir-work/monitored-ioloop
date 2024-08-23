@@ -2,6 +2,11 @@
 A production ready monitored IO loop for Python.  
 No more wondering why your event loop (or random pieces of your code) are suddenly popping up as slow in your monitoring.
 
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/gnir-work/monitored-ioloop/test_and_lint_package.yaml)
+![PyPI - Version](https://img.shields.io/pypi/v/monitored_ioloop)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/monitored_ioloop)
+
+
 ## Getting started
 ### Installation
 ```bash
