@@ -2,7 +2,7 @@ TARGET_DIR = .
 POETRY_GROUPS = dev,stress_test,code_quality,examples
 
 install:
-	poetry install --with ${POETRY_GROUPS} -E uvloop
+	poetry install --with ${POETRY_GROUPS} -E uvloop -E fastapi
 
 format:
 	poetry run ruff format ${TARGET_DIR}

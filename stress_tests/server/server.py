@@ -4,7 +4,7 @@ import typing
 import click
 from fastapi import FastAPI
 import asyncio
-from monitored_ioloop.monioted_ioloop_base import (
+from monitored_ioloop.monitored_ioloop_base import (
     BaseMonitoredEventLoopPolicy,
 )
 from uvicorn import Config, Server

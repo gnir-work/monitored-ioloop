@@ -2,14 +2,16 @@ from monitored_ioloop.exceptions import NoUvLoopInstalled
 
 try:
     import uvloop
+# pragma: no cover
 except ImportError:
+    # pragma: no cover
     raise NoUvLoopInstalled() from None
 
 import typing
 
 from asyncio import Handle
 
-from monitored_ioloop.monioted_ioloop_base import BaseMonitoredEventLoopPolicy
+from monitored_ioloop.monitored_ioloop_base import BaseMonitoredEventLoopPolicy
 from monitored_ioloop.monitoring import (
     wrap_callback_with_monitoring,
     IoLoopMonitorState,
