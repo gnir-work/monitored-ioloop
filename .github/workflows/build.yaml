@@ -1,0 +1,67 @@
+name: Deploy pypi package
+
+on:
+  push:
+    branches:
+      - main
+    tags-ignore:
+      - '*'
+
+env:
+  POETRY_GROUPS: uvloop
+
+jobs:
+  version-bump:
+    name: Bump version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up python 3.11
+        id: setup-python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Create poetry groups cache key
+        id: create-poetry-groups-cache-key
+        run: |
+          echo poetry_groups_cache_key='${{ env.POETRY_GROUPS }}' | sed 's/,/-/g' >> $GITHUB_OUTPUT
+
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}-${{ steps.create-poetry-groups-cache-key.outputs.poetry_groups_cache_key }}
+
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --with $POETRY_GROUPS
+
+      - name: Bump version
+        run: |
+          poetry version patch
+          export VERSION=v$(poetry version -s)
+          git add pyproject.toml
+          git commit -m "bump up ${{ github.event.inputs.version }} version from workflow"
+          git tag ${VERSION}
+          git push 
+          git push origin ${VERSION}
+
+      - name: Build package
+        run: |
+          poetry build
+
+      - name: Store the distribution packages
+        uses: actions/upload-artifact@v3
+        with:
+          name: python-package-distributions
+          path: dist/
