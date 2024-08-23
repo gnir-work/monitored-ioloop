@@ -1,8 +1,11 @@
 import threading
 import time
 import typing
+from asyncio import Handle
 from dataclasses import dataclass
 from logging import getLogger
+
+from monitored_ioloop.formatting_utils import pretty_format_handle, pretty_callback_name
 
 logger = getLogger(__name__)
 
@@ -27,6 +30,12 @@ class IoLoopMonitorState:
     Wall Time explanation - https://en.wikipedia.org/wiki/Wall-clock_time
     """
     callback_wall_time: float
+
+    """
+    A best effort try to give a meaningful name to the callback that was currently executed.
+    This property will come in handy when trying to debug callbacks with high wall time. 
+    """
+    callback_pretty_name: str
 
     """
     The amount of handles in the loop, excluding the current one.
@@ -59,31 +68,41 @@ class IoLoopInnerState:
             self.handles_count -= decrease_by
 
 
-class MonitoredCallback:
+class MonitoredCallbackWrapper:
     def __init__(
         self,
-        callback: typing.Callable[[IoLoopMonitorState], None],
+        callback: typing.Callable[..., typing.Any],
         monitor_callback: typing.Callable[[IoLoopMonitorState], None],
         io_loop_state: IoLoopInnerState,
     ):
-        self._callback_to_monitor = callback
-        self._original_callback = monitor_callback
+        self._original_callback = callback
+        self._monitor_callback = monitor_callback
         self._ioloop_state = io_loop_state
         self._added_to_loop_time = time.perf_counter()
+        self._handle: typing.Optional[Handle] = None
+
+    def set_handle(self, handle: Handle) -> None:
+        self._handle = handle
 
     def __call__(self, *args: typing.Any, **kwargs: typing.Any) -> typing.Any:
         loop_lag = time.perf_counter() - self._added_to_loop_time
         start_wall_time = time.perf_counter()
-        response = self._callback_to_monitor(*args, **kwargs)
+        response = self._original_callback(*args, **kwargs)
         self._ioloop_state.decrease_handles_count_thread_safe(1)
         wall_duration = time.perf_counter() - start_wall_time
 
         try:
-            self._original_callback(
+            pretty_name = (
+                pretty_format_handle(self._handle)
+                if self._handle
+                else pretty_callback_name(self._original_callback)
+            )
+            self._monitor_callback(
                 IoLoopMonitorState(
                     callback_wall_time=wall_duration,
                     loop_handles_count=self._ioloop_state.handles_count,
                     loop_lag=loop_lag,
+                    callback_pretty_name=pretty_name,
                 )
             )
         except Exception:
@@ -91,13 +110,13 @@ class MonitoredCallback:
         return response
 
     def __getattr__(self, item: str) -> typing.Any:
-        return getattr(self._callback_to_monitor, item)
+        return getattr(self._original_callback, item)
 
 
 def wrap_callback_with_monitoring(
     callback: typing.Callable[..., typing.Any],
     monitor_callback: typing.Callable[[IoLoopMonitorState], None],
     ioloop_state: IoLoopInnerState,
-) -> typing.Callable[..., typing.Any]:
+) -> MonitoredCallbackWrapper:
     ioloop_state.increase_handles_count_thread_safe(1)
-    return MonitoredCallback(callback, monitor_callback, ioloop_state)
+    return MonitoredCallbackWrapper(callback, monitor_callback, ioloop_state)
