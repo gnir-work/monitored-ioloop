@@ -3,7 +3,7 @@ import time
 
 from monitored_ioloop.monitored_asyncio import MonitoredAsyncIOEventLoopPolicy
 from monitored_ioloop.monitoring import IoLoopMonitorState
-from monitored_ioloop.helpers.fastapi import MonitoredAsyncIOMiddleWare
+from monitored_ioloop.helpers.fastapi import get_monitor_async_io_middleware
 from fastapi import FastAPI
 from prometheus_client import start_http_server, Histogram
 from uvicorn import Server, Config
@@ -22,7 +22,7 @@ loop_lag_time_histogram = Histogram(
 )
 
 app = FastAPI()
-app.add_middleware(MonitoredAsyncIOMiddleWare)
+app.add_middleware(get_monitor_async_io_middleware())
 
 
 @app.get("/ping")

@@ -4,15 +4,14 @@ import pytest
 from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR
+from starlette.types import Scope
 
-from monitored_ioloop.helpers.fastapi import MonitoredAsyncIOMiddleWare
+from monitored_ioloop.helpers.fastapi import get_monitor_async_io_middleware
 
 
 @pytest.fixture
 def fastapi_app() -> FastAPI:
     app = FastAPI()
-
-    app.add_middleware(MonitoredAsyncIOMiddleWare)
 
     @app.get("/ping")
     async def ping() -> str:
@@ -35,10 +34,28 @@ def fastapi_app() -> FastAPI:
 
 
 @pytest.fixture
+def default_monitoring_middleware(
+    fastapi_app: FastAPI,
+) -> None:
+    fastapi_app.add_middleware(get_monitor_async_io_middleware())
+
+
+@pytest.fixture
+def custom_formatting_monitoring_middleware(
+    fastapi_app: FastAPI,
+) -> None:
+    def custom_formatter(scope: Scope) -> str:
+        return f"[Custom] [{scope['method']}] {scope['path']}"
+
+    fastapi_app.add_middleware(get_monitor_async_io_middleware(custom_formatter))
+
+
+@pytest.fixture
 def test_client(fastapi_app: FastAPI) -> TestClient:
     return TestClient(fastapi_app)
 
 
+@pytest.mark.usefixtures("default_monitoring_middleware")
 def test_monitored_async_io_middleware__simple_route_still_works(
     test_client: TestClient,
 ) -> None:
@@ -47,6 +64,7 @@ def test_monitored_async_io_middleware__simple_route_still_works(
     assert response.json() == "ping"
 
 
+@pytest.mark.usefixtures("default_monitoring_middleware")
 def test_monitored_async_io_middleware__simple_routes_task_name(
     test_client: TestClient,
 ) -> None:
@@ -55,6 +73,7 @@ def test_monitored_async_io_middleware__simple_routes_task_name(
     assert response.json() == "[GET] /simple_route"
 
 
+@pytest.mark.usefixtures("default_monitoring_middleware")
 def test_monitored_async_io_middleware__nested_route_task_name(
     test_client: TestClient,
 ) -> None:
@@ -63,6 +82,7 @@ def test_monitored_async_io_middleware__nested_route_task_name(
     assert response.json() == "[GET] /nested/route"
 
 
+@pytest.mark.usefixtures("default_monitoring_middleware")
 def test_monitored_async_io_middleware__query_parameters_task_name(
     test_client: TestClient,
 ) -> None:
@@ -71,6 +91,7 @@ def test_monitored_async_io_middleware__query_parameters_task_name(
     assert response.json() == "[GET] /query_parameters"
 
 
+@pytest.mark.usefixtures("default_monitoring_middleware")
 def test_monitored_async_io_middleware__path_parameters_task_name(
     test_client: TestClient,
 ) -> None:
@@ -79,9 +100,19 @@ def test_monitored_async_io_middleware__path_parameters_task_name(
     assert response.json() == "[GET] /path/parameters/test"
 
 
+@pytest.mark.usefixtures("default_monitoring_middleware")
 def test_monitored_async_io_middleware__post_method_task_name(
     test_client: TestClient,
 ) -> None:
     response = test_client.post("/post/method")
     assert response.status_code == 200, response.text
     assert response.json() == "[POST] /post/method"
+
+
+@pytest.mark.usefixtures("custom_formatting_monitoring_middleware")
+def test_monitored_async_io_middleware__simple_routes_task_name__custom_formatter(
+    test_client: TestClient,
+) -> None:
+    response = test_client.get("/simple_route")
+    assert response.status_code == 200
+    assert response.json() == "[Custom] [GET] /simple_route"
