@@ -32,12 +32,12 @@ def test_simple_blocking_coroutine(
     asyncio.run(blocking_coroutine(block_for))
     print(mock.mock_calls)
     (blocking_coroutine_monitor,) = mock.mock_calls[0].args
-    _assert_monitor_result(block_for, blocking_coroutine_monitor.wall_task_time)
+    _assert_monitor_result(block_for, blocking_coroutine_monitor.callback_wall_time)
     assert (
-        mock.mock_calls[0].args[0].handles_count == 1
+        mock.mock_calls[0].args[0].loop_handles_count == 1
     ), "Initial handles count should be 1."
     assert (
-        mock.mock_calls[-1].args[0].handles_count == 0
+        mock.mock_calls[-1].args[0].loop_handles_count == 0
     ), "Handles count should drop to 0."
 
 
@@ -78,8 +78,8 @@ def test_complex_blocking_coroutine(
     asyncio.run(complex_blocking_coroutine(block_for))
     (first_blocking_section,) = mock.mock_calls[0].args
     (second_blocking_section,) = mock.mock_calls[1].args
-    _assert_monitor_result(block_for, first_blocking_section.wall_task_time)
-    _assert_monitor_result(block_for, second_blocking_section.wall_task_time)
+    _assert_monitor_result(block_for, first_blocking_section.callback_wall_time)
+    _assert_monitor_result(block_for, second_blocking_section.callback_wall_time)
 
 
 async def run_blocking_coroutine_in_task(block_for: float) -> None:
@@ -99,7 +99,7 @@ def test_task_blocking_coroutine(
     block_for = 0.5
     asyncio.run(run_blocking_coroutine_in_task(block_for))
     (blocking_coroutine_monitor,) = mock.mock_calls[1].args
-    _assert_monitor_result(block_for, blocking_coroutine_monitor.wall_task_time)
+    _assert_monitor_result(block_for, blocking_coroutine_monitor.callback_wall_time)
 
 
 async def non_cpu_intensive_blocking_coroutine(block_time: float) -> None:
@@ -118,7 +118,7 @@ def test_non_cpu_intensive_blocking_coroutine(
     block_for = 0.5
     asyncio.run(non_cpu_intensive_blocking_coroutine(block_for))
     (blocking_coroutine_monitor,) = mock.mock_calls[0].args
-    _assert_monitor_result(block_for, blocking_coroutine_monitor.wall_task_time)
+    _assert_monitor_result(block_for, blocking_coroutine_monitor.callback_wall_time)
 
 
 async def exception_raising_coroutine() -> None:
@@ -137,10 +137,10 @@ def test_handles_count_decreases_even_if_handle_raises_exception(
     with pytest.raises(ValueError):
         asyncio.run(exception_raising_coroutine())
     assert (
-        mock.mock_calls[0].args[0].handles_count == 1
+        mock.mock_calls[0].args[0].loop_handles_count == 1
     ), "Initial handles count should be 1."
     assert (
-        mock.mock_calls[-1].args[0].handles_count == 0
+        mock.mock_calls[-1].args[0].loop_handles_count == 0
     ), "Handles count should drop to 0."
 
 
@@ -175,10 +175,10 @@ def test_handles_count_with_multiple_coroutines(
         multiple_coroutines_partly_blocking(blocking_count=0, non_blocking_count=3)
     )
     assert (
-        mock.mock_calls[0].args[0].handles_count == 3
+        mock.mock_calls[0].args[0].loop_handles_count == 3
     ), "After the first handle finishes we should have 3 sleep coroutines running."
     assert (
-        mock.mock_calls[-1].args[0].handles_count == 0
+        mock.mock_calls[-1].args[0].loop_handles_count == 0
     ), "Handles count should drop to 0."
 
 
@@ -200,7 +200,7 @@ def test_loop_lag(
         )
     )
     assert (
-        mock.mock_calls[0].args[0].handles_count
+        mock.mock_calls[0].args[0].loop_handles_count
         == non_blocking_coroutines_count + blocking_coroutines_count
     ), "After the first handle finishes all coroutines should be registered."
     assert (

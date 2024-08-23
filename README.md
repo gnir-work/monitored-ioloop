@@ -48,9 +48,9 @@ The usage is the same as the asyncio event loop, but with `monitored_ioloop.moni
 ## The monitor callback
 The monitor callback will be called for every execution that the event loop initiates.  
 With every call you will receive an [IoLoopMonitorState](monitored_ioloop/monitoring.py) object that contains the following information:
-- `wall_loop_duration`: The time it took to execute the current step of the event loop in wall time.
-- `cpu_loop_duration`: The time it took to execute the current step of the event loop in CPU time.
-- `handles_count`: The amount of handles (think about them as tasks) that the IO loop is currently handling.
+- `callback_wall_time`: Wall executing time of the callback.
+- `loop_handles_count`: The amount of handles (think about them as tasks) that the IO loop is currently handling.
+- `loop_lag`: The amount of time it took from the moment the task was added to the loop until it was executed.
 
 ## Performance impact
 As many of you might be concerned about the performance impact of this library, I have run some benchmarks to measure the performance impact of this library.  
@@ -65,11 +65,14 @@ Currently there is only the [fastapi with prometheus exporter example](examples/
 ## Roadmap
 - [x] Add support for the amount of `Handle`'s on the event loop
 - [x] Add an examples folder
+- [x] Add loop lag metric (Inspired from nodejs loop monitoring)
 - [ ] Add visibility into which `Handle` are making the event loop slower
-- [ ] Add easier integration with popular monitoring tools like Prometheus
 - [ ] Add easier integration with `uvicorn`
+- [ ] Add easier integration with popular monitoring tools like Prometheus
+
 
 
 ## Credits
-I took a lot of inspiration from the [uvloop](https://github.com/MagicStack/uvloop) project with everythin
+* I took a lot of inspiration from the [uvloop](https://github.com/MagicStack/uvloop) project with everything
 regarding the user interface of swapping the IO loop.
+* The great pycon talk - https://www.youtube.com/watch?v=GSiZkP7cI80&t=16s

@@ -9,11 +9,33 @@ logger = getLogger(__name__)
 
 @dataclass
 class IoLoopMonitorState:
-    # The time it took to execute the callback in wall clock time - https://en.wikipedia.org/wiki/Wall-clock_time
-    wall_task_time: float
-    # The amount of handles in the loop - https://docs.python.org/3/library/asyncio-eventloop.html#callback-handles
-    handles_count: int
-    # The time passed from the time the coroutine was added to the loop until it was executed.
+    """
+    A dataclass containing the state of the loop when the callback was executed.
+    This class is the interface that the monitor callback will receive.
+
+    A basic Lexicon:
+    * Handle - A wrapper for a callback that is scheduled to be executed by the loop.
+    * Callback - The function that is executed by the loop.
+    * Loop - The event loop that is executing the callbacks.
+    """
+
+    """
+    Wall executing time of the callback
+    It can be the whole coroutine or parts of it, depending on if the executing control
+    was delegated back the loop or not.
+
+    Wall Time explanation - https://en.wikipedia.org/wiki/Wall-clock_time
+    """
+    callback_wall_time: float
+
+    """
+    The amount of handles in the loop, excluding the current one.
+    """
+    loop_handles_count: int
+
+    """
+    The amount of time it took from the moment the coroutine was added to the loop until it was executed.
+    """
     loop_lag: float
 
 
@@ -60,8 +82,8 @@ def wrap_callback_with_monitoring(
         try:
             monitor_callback(
                 IoLoopMonitorState(
-                    wall_task_time=wall_duration,
-                    handles_count=ioloop_state.handles_count,
+                    callback_wall_time=wall_duration,
+                    loop_handles_count=ioloop_state.handles_count,
                     loop_lag=loop_lag,
                 )
             )
