@@ -23,12 +23,17 @@ class MonitoredSelectorEventLoop(asyncio.SelectorEventLoop):
         **kwargs: typing.Any,
     ) -> Handle:
         def wrapper(*inner_args: typing.Any, **inner_kwargs: typing.Any) -> typing.Any:
-            start = time.time()
+            start_wall_time = time.time()
+            start_cpu_time = time.process_time()
             response = callback(*inner_args, **inner_kwargs)
-            duration = time.time() - start
+            wall_duration = time.time() - start_wall_time
+            cpu_duration = time.process_time() - start_cpu_time
             if self._monitor_callback:
                 self._monitor_callback(
-                    IoLoopMonitorState(single_loop_duration=duration)
+                    IoLoopMonitorState(
+                        wall_loop_duration=wall_duration,
+                        cpu_loop_duration=cpu_duration,
+                    )
                 )
             return response
 
