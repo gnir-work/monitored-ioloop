@@ -4,6 +4,11 @@ version = "0.0.9"
 description = ""
 authors = ["gnir <gnir.work@gmail.com>"]
 readme = "README.md"
+packages = [
+  {include = "monitored_ioloop"},
+  {include = "monitored_ioloop/py.typed"},
+]
+
 
 [tool.poetry.dependencies]
 python = "^3.9"
