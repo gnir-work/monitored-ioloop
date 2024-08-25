@@ -59,6 +59,25 @@ def test_monitor_callback_error_is_handled(
     asyncio.run(blocking_coroutine(block_for))
 
 
+async def coroutine_with_result() -> int:
+    await asyncio.sleep(0.1)
+    return 10
+
+
+@pytest.mark.parametrize(
+    "ioloop_policy_class",
+    [MonitoredAsyncIOEventLoopPolicy, MonitoredUvloopEventLoopPolicy],
+)
+def test_callback_returns_value_even_if_monitor_callback_fails(
+    ioloop_policy_class: typing.Type[MonitoredUvloopEventLoopPolicy],
+) -> None:
+    asyncio.set_event_loop_policy(
+        ioloop_policy_class(monitor_callback=monitor_callback_with_error)
+    )
+    result = asyncio.run(coroutine_with_result())
+    assert result == 10
+
+
 async def complex_blocking_coroutine(block_for: float) -> None:
     busy_wait(block_for)
     await asyncio.sleep(1)

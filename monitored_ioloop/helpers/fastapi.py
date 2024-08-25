@@ -8,11 +8,21 @@ class AsgiMiddlewareType(Protocol):
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None: ...
 
 
+def mask_numeric_segments(path: str) -> str:
+    """
+    Example:
+    mask_numeric_segments("/api/v1/users/123/name") -> "/api/v1/users/_/name"
+    """
+    path_parts = path.split("/")
+    return "/".join((part if not part.isdigit() else "_") for part in path_parts)
+
+
 def default_callback_pretty_name(scope: Scope) -> str:
     """
     Default callback_pretty_name for FastAPI helper middleware.
     """
-    return f"[{scope['method']}] {scope['path']}"
+    masked_path = mask_numeric_segments(scope["path"])
+    return f"[{scope['method']}] {masked_path}"
 
 
 def get_monitor_async_io_middleware(

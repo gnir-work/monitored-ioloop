@@ -101,6 +101,15 @@ def test_monitored_async_io_middleware__path_parameters_task_name(
 
 
 @pytest.mark.usefixtures("default_monitoring_middleware")
+def test_monitored_async_io_middleware__path_parameters_with_numbers_are_masked_task_name(
+    test_client: TestClient,
+) -> None:
+    response = test_client.get("/path/parameters/1234")
+    assert response.status_code == 200, response.text
+    assert response.json() == "[GET] /path/parameters/_"
+
+
+@pytest.mark.usefixtures("default_monitoring_middleware")
 def test_monitored_async_io_middleware__post_method_task_name(
     test_client: TestClient,
 ) -> None:
