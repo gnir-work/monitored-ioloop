@@ -1,4 +1,16 @@
+import asyncio
 import time
+from typing import Type
+
+from monitored_ioloop.monitored_asyncio import (
+    MonitoredAsyncIOEventLoopPolicy,
+    MonitoredSelectorEventLoop,
+)
+from monitored_ioloop.monitored_ioloop_base import BaseMonitoredEventLoopPolicy
+from monitored_ioloop.monitored_uvloop import (
+    MonitoredUvloopEventLoopPolicy,
+    MonitoredUvloopEventLoop,
+)
 
 BLOCK_THRESHOLD = 0.1
 
@@ -25,3 +37,18 @@ def _check_monitor_result(
         < monitored_block
         < expected_block * (1 + threshold)
     )
+
+
+async def _assert_expected_loop_type(
+    loop_policy: Type[BaseMonitoredEventLoopPolicy],
+) -> None:
+    if issubclass(loop_policy, MonitoredAsyncIOEventLoopPolicy):
+        assert isinstance(asyncio.get_event_loop(), MonitoredSelectorEventLoop)
+    elif issubclass(loop_policy, MonitoredUvloopEventLoopPolicy):
+        assert isinstance(asyncio.get_event_loop(), MonitoredUvloopEventLoop)
+    else:
+        raise ValueError("Unknown loop policy")
+
+
+def assert_expected_loop_type(loop_policy: Type[BaseMonitoredEventLoopPolicy]) -> None:
+    asyncio.run(_assert_expected_loop_type(loop_policy))

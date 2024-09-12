@@ -9,20 +9,17 @@ from monitored_ioloop.monitored_ioloop_base import (
     BaseMonitoredEventLoopPolicy,
 )
 from monitored_ioloop.monitored_uvloop import MonitoredUvloopEventLoopPolicy
-from monitored_ioloop.monitored_asyncio import (
-    MonitoredAsyncIOEventLoopPolicy,
+from tests.utils import (
+    busy_wait,
+    _assert_monitor_result,
+    _check_monitor_result,
 )
-from tests.utils import busy_wait, _assert_monitor_result, _check_monitor_result
 
 
 async def blocking_coroutine(block_for: float) -> None:
     busy_wait(block_for)
 
 
-@pytest.mark.parametrize(
-    "ioloop_policy_class",
-    [MonitoredAsyncIOEventLoopPolicy, MonitoredUvloopEventLoopPolicy],
-)
 def test_simple_blocking_coroutine(
     ioloop_policy_class: typing.Type[BaseMonitoredEventLoopPolicy],
 ) -> None:
@@ -30,7 +27,6 @@ def test_simple_blocking_coroutine(
     asyncio.set_event_loop_policy(ioloop_policy_class(monitor_callback=mock))
     block_for = 0.5
     asyncio.run(blocking_coroutine(block_for))
-    print(mock.mock_calls)
     (blocking_coroutine_monitor,) = mock.mock_calls[0].args
     _assert_monitor_result(block_for, blocking_coroutine_monitor.callback_wall_time)
     assert (
@@ -45,10 +41,6 @@ def monitor_callback_with_error(monitor: typing.Any) -> None:
     raise ValueError("This monitor callback raises an exception.")
 
 
-@pytest.mark.parametrize(
-    "ioloop_policy_class",
-    [MonitoredAsyncIOEventLoopPolicy, MonitoredUvloopEventLoopPolicy],
-)
 def test_monitor_callback_error_is_handled(
     ioloop_policy_class: typing.Type[BaseMonitoredEventLoopPolicy],
 ) -> None:
@@ -64,16 +56,11 @@ async def coroutine_with_result() -> int:
     return 10
 
 
-@pytest.mark.parametrize(
-    "ioloop_policy_class",
-    [MonitoredAsyncIOEventLoopPolicy, MonitoredUvloopEventLoopPolicy],
-)
 def test_callback_returns_value_even_if_monitor_callback_fails(
-    ioloop_policy_class: typing.Type[MonitoredUvloopEventLoopPolicy],
+    ioloop_policy_class: typing.Type[BaseMonitoredEventLoopPolicy],
 ) -> None:
-    asyncio.set_event_loop_policy(
-        ioloop_policy_class(monitor_callback=monitor_callback_with_error)
-    )
+    policy = ioloop_policy_class(monitor_callback=monitor_callback_with_error)
+    asyncio.set_event_loop_policy(policy)
     result = asyncio.run(coroutine_with_result())
     assert result == 10
 
@@ -84,10 +71,6 @@ async def complex_blocking_coroutine(block_for: float) -> None:
     busy_wait(block_for)
 
 
-@pytest.mark.parametrize(
-    "ioloop_policy_class",
-    [MonitoredAsyncIOEventLoopPolicy, MonitoredUvloopEventLoopPolicy],
-)
 def test_complex_blocking_coroutine(
     ioloop_policy_class: typing.Type[MonitoredUvloopEventLoopPolicy],
 ) -> None:
@@ -106,10 +89,6 @@ async def run_blocking_coroutine_in_task(block_for: float) -> None:
     await task
 
 
-@pytest.mark.parametrize(
-    "ioloop_policy_class",
-    [MonitoredAsyncIOEventLoopPolicy, MonitoredUvloopEventLoopPolicy],
-)
 def test_task_blocking_coroutine(
     ioloop_policy_class: typing.Type[MonitoredUvloopEventLoopPolicy],
 ) -> None:
@@ -125,10 +104,6 @@ async def non_cpu_intensive_blocking_coroutine(block_time: float) -> None:
     time.sleep(block_time)
 
 
-@pytest.mark.parametrize(
-    "ioloop_policy_class",
-    [MonitoredAsyncIOEventLoopPolicy, MonitoredUvloopEventLoopPolicy],
-)
 def test_non_cpu_intensive_blocking_coroutine(
     ioloop_policy_class: typing.Type[MonitoredUvloopEventLoopPolicy],
 ) -> None:
@@ -144,10 +119,6 @@ async def exception_raising_coroutine() -> None:
     raise ValueError("This coroutine raises an exception.")
 
 
-@pytest.mark.parametrize(
-    "ioloop_policy_class",
-    [MonitoredAsyncIOEventLoopPolicy, MonitoredUvloopEventLoopPolicy],
-)
 def test_handles_count_decreases_even_if_handle_raises_exception(
     ioloop_policy_class: typing.Type[MonitoredUvloopEventLoopPolicy],
 ) -> None:
@@ -181,10 +152,6 @@ async def multiple_coroutines_partly_blocking(
     )
 
 
-@pytest.mark.parametrize(
-    "ioloop_policy_class",
-    [MonitoredAsyncIOEventLoopPolicy, MonitoredUvloopEventLoopPolicy],
-)
 def test_handles_count_with_multiple_coroutines(
     ioloop_policy_class: typing.Type[MonitoredUvloopEventLoopPolicy],
 ) -> None:
@@ -201,10 +168,6 @@ def test_handles_count_with_multiple_coroutines(
     ), "Handles count should drop to 0."
 
 
-@pytest.mark.parametrize(
-    "ioloop_policy_class",
-    [MonitoredAsyncIOEventLoopPolicy, MonitoredUvloopEventLoopPolicy],
-)
 def test_loop_lag(
     ioloop_policy_class: typing.Type[MonitoredUvloopEventLoopPolicy],
 ) -> None:
@@ -234,10 +197,6 @@ def test_loop_lag(
     )
 
 
-@pytest.mark.parametrize(
-    "ioloop_policy_class",
-    [MonitoredAsyncIOEventLoopPolicy, MonitoredUvloopEventLoopPolicy],
-)
 def test_callback_pretty_name__basic_top_level_coroutine_name(
     ioloop_policy_class: typing.Type[MonitoredUvloopEventLoopPolicy],
 ) -> None:
@@ -271,10 +230,6 @@ async def several_coroutines_in_gather_with_pretty_name_testing() -> None:
     )
 
 
-@pytest.mark.parametrize(
-    "ioloop_policy_class",
-    [MonitoredAsyncIOEventLoopPolicy, MonitoredUvloopEventLoopPolicy],
-)
 def test_callback_pretty_name__several_coroutines_with_gather(
     ioloop_policy_class: typing.Type[MonitoredUvloopEventLoopPolicy],
 ) -> None:
