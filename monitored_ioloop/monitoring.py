@@ -5,6 +5,8 @@ from asyncio import Handle
 from dataclasses import dataclass
 from logging import getLogger
 
+import wrapt
+
 from monitored_ioloop.formatting_utils import pretty_format_handle, pretty_callback_name
 
 logger = getLogger(__name__)
@@ -68,39 +70,40 @@ class IoLoopInnerState:
             self.handles_count -= decrease_by
 
 
-class MonitoredCallbackWrapper:
+class MonitoredCallbackWrapper(wrapt.ObjectProxy):  # type: ignore
     def __init__(
         self,
         callback: typing.Callable[..., typing.Any],
         monitor_callback: typing.Callable[[IoLoopMonitorState], None],
         io_loop_state: IoLoopInnerState,
     ):
-        self._original_callback = callback
-        self._monitor_callback = monitor_callback
-        self._ioloop_state = io_loop_state
-        self._added_to_loop_time = time.perf_counter()
-        self._handle: typing.Optional[Handle] = None
+        super().__init__(callback)
+        self._self_original_callback = callback
+        self._self_monitor_callback = monitor_callback
+        self._self_ioloop_state = io_loop_state
+        self._self_added_to_loop_time = time.perf_counter()
+        self._self_handle: typing.Optional[Handle] = None
 
     def set_handle(self, handle: Handle) -> None:
-        self._handle = handle
+        self._self_handle = handle
 
     def __call__(self, *args: typing.Any, **kwargs: typing.Any) -> typing.Any:
-        loop_lag = time.perf_counter() - self._added_to_loop_time
+        loop_lag = time.perf_counter() - self._self_added_to_loop_time
         start_wall_time = time.perf_counter()
-        response = self._original_callback(*args, **kwargs)
-        self._ioloop_state.decrease_handles_count_thread_safe(1)
+        response = self._self_original_callback(*args, **kwargs)
+        self._self_ioloop_state.decrease_handles_count_thread_safe(1)
         wall_duration = time.perf_counter() - start_wall_time
 
         try:
             pretty_name = (
-                pretty_format_handle(self._handle)
-                if self._handle
-                else pretty_callback_name(self._original_callback)
+                pretty_format_handle(self._self_handle)
+                if self._self_handle
+                else pretty_callback_name(self._self_original_callback)
             )
-            self._monitor_callback(
+            self._self_monitor_callback(
                 IoLoopMonitorState(
                     callback_wall_time=wall_duration,
-                    loop_handles_count=self._ioloop_state.handles_count,
+                    loop_handles_count=self._self_ioloop_state.handles_count,
                     loop_lag=loop_lag,
                     callback_pretty_name=pretty_name,
                 )
@@ -108,9 +111,6 @@ class MonitoredCallbackWrapper:
         except Exception:
             logger.warning("Monitor callback failed.", exc_info=True)
         return response
-
-    def __getattr__(self, item: str) -> typing.Any:
-        return getattr(self._original_callback, item)
 
 
 def wrap_callback_with_monitoring(
