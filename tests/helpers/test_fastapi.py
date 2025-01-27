@@ -4,9 +4,8 @@ import pytest
 from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR
-from starlette.types import Scope
 
-from monitored_ioloop.helpers.fastapi import get_monitor_async_io_middleware
+from monitored_ioloop.helpers.fastapi import MonitoredIOLoopMiddleware
 
 
 @pytest.fixture
@@ -37,17 +36,7 @@ def fastapi_app() -> FastAPI:
 def default_monitoring_middleware(
     fastapi_app: FastAPI,
 ) -> None:
-    fastapi_app.add_middleware(get_monitor_async_io_middleware())
-
-
-@pytest.fixture
-def custom_formatting_monitoring_middleware(
-    fastapi_app: FastAPI,
-) -> None:
-    def custom_formatter(scope: Scope) -> str:
-        return f"[Custom] [{scope['method']}] {scope['path']}"
-
-    fastapi_app.add_middleware(get_monitor_async_io_middleware(custom_formatter))
+    fastapi_app.add_middleware(MonitoredIOLoopMiddleware)
 
 
 @pytest.fixture
@@ -116,12 +105,3 @@ def test_monitored_async_io_middleware__post_method_task_name(
     response = test_client.post("/post/method")
     assert response.status_code == 200, response.text
     assert response.json() == "[POST] /post/method"
-
-
-@pytest.mark.usefixtures("custom_formatting_monitoring_middleware")
-def test_monitored_async_io_middleware__simple_routes_task_name__custom_formatter(
-    test_client: TestClient,
-) -> None:
-    response = test_client.get("/simple_route")
-    assert response.status_code == 200
-    assert response.json() == "[Custom] [GET] /simple_route"
