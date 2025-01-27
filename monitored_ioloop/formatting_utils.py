@@ -15,6 +15,12 @@ def pretty_format_handle(handle: Handle) -> str:
 def pretty_callback_name(callback: typing.Callable[..., typing.Any]) -> str:
     if isinstance(getattr(callback, "__self__", None), tasks.Task):
         # format the task
-        return repr(callback.__self__)  # type: ignore
+        return getattr(
+            callback.__self__,  # type: ignore
+            "__qualname__",
+            None,
+        ) or repr(
+            callback.__self__  # type: ignore
+        )
     else:
-        return repr(callback)
+        return getattr(callback, "__qualname__", None) or repr(callback)
