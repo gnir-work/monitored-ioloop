@@ -47,11 +47,14 @@ jobs:
       - name: Install dependencies
         run: just install
 
+      - name: Assert lock is up to date
+        run: uv lock --check
+
       - name: Bump version
         id: version-bump
         run: |
           echo current_version=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])") >> $GITHUB_OUTPUT
-          uv version patch
+          uv version --bump patch
           echo new_version=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])") >> $GITHUB_OUTPUT
 
       - name: Push changes
