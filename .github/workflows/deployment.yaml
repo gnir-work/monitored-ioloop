@@ -59,7 +59,7 @@ jobs:
 
       - name: Push changes
         run: |
-          git add pyproject.toml
+          git add pyproject.toml uv.lock
           git commit -m "bumping from version ${{ steps.version-bump.outputs.current_version }} to version ${{ steps.version-bump.outputs.new_version }} from workflow"
           git push 
           git tag v${{ steps.version-bump.outputs.new_version }}
