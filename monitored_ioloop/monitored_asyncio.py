@@ -56,3 +56,21 @@ class MonitoredAsyncIOEventLoopPolicy(BaseMonitoredEventLoopPolicy):
     def _loop_factory(self) -> MonitoredSelectorEventLoop:
         loop = MonitoredSelectorEventLoop(self._monitor_callback)
         return loop
+
+
+def monitored_asyncio_loop_factory(
+    monitor_callback: typing.Callable[[IoLoopMonitorState], None],
+) -> typing.Callable[[], MonitoredSelectorEventLoop]:
+    """Create a loop factory function for use with asyncio.run().
+
+    Usage:
+    >>> import asyncio
+    >>> import monitored_ioloop
+    >>> factory = monitored_ioloop.monitored_asyncio_loop_factory(lambda state: print(state))
+    >>> asyncio.run(main(), loop_factory=factory)
+    """
+
+    def factory() -> MonitoredSelectorEventLoop:
+        return MonitoredSelectorEventLoop(monitor_callback)
+
+    return factory

@@ -1,7 +1,7 @@
 import asyncio
 import time
 
-from monitored_ioloop.monitored_asyncio import MonitoredAsyncIOEventLoopPolicy
+from monitored_ioloop.monitored_asyncio import monitored_asyncio_loop_factory
 from monitored_ioloop.monitoring import IoLoopMonitorState
 from monitored_ioloop.helpers.fastapi import (
     MonitoredIOLoopMiddleware,
@@ -56,16 +56,13 @@ def monitor_ioloop(ioloop_monitor_state: IoLoopMonitorState) -> None:
 
 def main() -> None:
     """
-    Current because uvloop does not support settings the ioloop to a custom implementation, we need to
-    run the server manually and not from the CLI.
-    I am currently working on allowing passing an import string to a custom event loop policy which
-    will considerably simplify the fastapi example.
+    Using the new loop factory API for cleaner integration with asyncio.run().
     """
-    asyncio.set_event_loop_policy(MonitoredAsyncIOEventLoopPolicy(monitor_ioloop))
+    loop_factory = monitored_asyncio_loop_factory(monitor_ioloop)
     config = Config(app=app, host="localhost", port=1441, loop="asyncio")
     server = Server(config)
     start_http_server(1551)
-    asyncio.run(server.serve())
+    asyncio.run(server.serve(), loop_factory=loop_factory)
 
 
 if __name__ == "__main__":

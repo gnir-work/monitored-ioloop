@@ -1,4 +1,4 @@
-from monitored_ioloop.monitored_asyncio import MonitoredAsyncIOEventLoopPolicy
+from monitored_ioloop.monitored_asyncio import monitored_asyncio_loop_factory
 from monitored_ioloop.monitoring import IoLoopMonitorState
 import asyncio
 import logging
@@ -48,8 +48,6 @@ if __name__ == "__main__":
         format="%(asctime)s %(message)s",
     )
     logger.info("starting")
-    asyncio.set_event_loop_policy(
-        MonitoredAsyncIOEventLoopPolicy(monitor_callback=monitor)
-    )
-    logger.info("Set event loop")
-    asyncio.run(main())
+    loop_factory = monitored_asyncio_loop_factory(monitor_callback=monitor)
+    logger.info("Created loop factory")
+    asyncio.run(main(), loop_factory=loop_factory)

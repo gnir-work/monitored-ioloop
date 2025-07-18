@@ -61,3 +61,21 @@ class MonitoredUvloopEventLoopPolicy(BaseMonitoredEventLoopPolicy):
     def _loop_factory(self) -> MonitoredUvloopEventLoop:
         loop = MonitoredUvloopEventLoop(self._monitor_callback)
         return loop
+
+
+def monitored_uvloop_loop_factory(
+    monitor_callback: typing.Callable[[IoLoopMonitorState], None],
+) -> typing.Callable[[], MonitoredUvloopEventLoop]:
+    """Create a loop factory function for use with asyncio.run().
+
+    Usage:
+    >>> import asyncio
+    >>> import monitored_ioloop
+    >>> factory = monitored_ioloop.monitored_uvloop_loop_factory(lambda state: print(state))
+    >>> asyncio.run(main(), loop_factory=factory)
+    """
+
+    def loop_factory() -> MonitoredUvloopEventLoop:
+        return MonitoredUvloopEventLoop(monitor_callback)
+
+    return loop_factory

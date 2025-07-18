@@ -9,6 +9,8 @@ from monitored_ioloop.monitored_ioloop_base import (
     BaseMonitoredEventLoopPolicy,
 )
 from monitored_ioloop.monitored_uvloop import MonitoredUvloopEventLoopPolicy
+from monitored_ioloop.monitored_asyncio import monitored_asyncio_loop_factory
+from monitored_ioloop.monitored_uvloop import monitored_uvloop_loop_factory
 from tests.utils import (
     busy_wait,
     _assert_monitor_result,
@@ -277,3 +279,33 @@ def test_callback_pretty_name__several_coroutines_with_gather(
         )
         == 1
     )
+
+
+def test_asyncio_loop_factory_simple_blocking() -> None:
+    mock = Mock()
+    factory = monitored_asyncio_loop_factory(mock)
+    block_for = 0.5
+    asyncio.run(blocking_coroutine(block_for), loop_factory=factory)
+    (blocking_coroutine_monitor,) = mock.mock_calls[0].args
+    _assert_monitor_result(block_for, blocking_coroutine_monitor.callback_wall_time)
+    assert (
+        mock.mock_calls[0].args[0].loop_handles_count == 1
+    ), "Initial handles count should be 1."
+    assert (
+        mock.mock_calls[-1].args[0].loop_handles_count == 0
+    ), "Handles count should drop to 0."
+
+
+def test_uvloop_loop_factory_simple_blocking() -> None:
+    mock = Mock()
+    factory = monitored_uvloop_loop_factory(mock)
+    block_for = 0.5
+    asyncio.run(blocking_coroutine(block_for), loop_factory=factory)
+    (blocking_coroutine_monitor,) = mock.mock_calls[0].args
+    _assert_monitor_result(block_for, blocking_coroutine_monitor.callback_wall_time)
+    assert (
+        mock.mock_calls[0].args[0].loop_handles_count == 1
+    ), "Initial handles count should be 1."
+    assert (
+        mock.mock_calls[-1].args[0].loop_handles_count == 0
+    ), "Handles count should drop to 0."
