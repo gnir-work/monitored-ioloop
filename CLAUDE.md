@@ -82,6 +82,7 @@ just test-for-flakiness         # Run tests 10 times to check for flakiness
 ### Type Checking (mypy.ini)
 - Strict typing enabled
 - Disallow untyped definitions
+- NEVER use `Any` type or `type: ignore` comments
 - Check for incomplete definitions
 - Warn about unused ignores and redundant casts
 
