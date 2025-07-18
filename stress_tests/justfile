@@ -1,0 +1,9 @@
+io_loop_type := "asyncio"
+
+# Run the test server with specified monitor type
+run-server io_loop_type=io_loop_type:
+    uv run python server/server.py --monitor-type {{io_loop_type}}
+
+# Run stress test with locust - requires OUTPUT_FILE parameter
+run-stress-test output_file:
+    uv run locust --users 300 --spawn-rate 100 -t 15 --headless --process 4 --csv {{output_file}}

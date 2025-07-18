@@ -1,0 +1,7 @@
+# Run the FastAPI server with prometheus monitoring
+run:
+    uv run python server.py
+
+# Create traffic to test the monitoring
+create-traffic:
+    uv run python create_traffic.py
