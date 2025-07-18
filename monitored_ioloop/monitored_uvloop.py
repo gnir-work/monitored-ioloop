@@ -10,6 +10,7 @@ except ImportError:
     raise NoUvLoopInstalled() from None
 
 import typing
+import warnings
 
 from asyncio import Handle
 
@@ -49,14 +50,26 @@ class MonitoredUvloopEventLoop(uvloop.Loop):
 class MonitoredUvloopEventLoopPolicy(BaseMonitoredEventLoopPolicy):
     """Event loop policy.
 
-    The preferred way to make your application use monitored uvloop ioloop:
+    .. deprecated:: 0.0.15
+        Use :func:`monitored_uvloop_loop_factory` instead.
+        The policy-based approach is deprecated in favor of the loop factory approach
+        which is preferred by Python's asyncio documentation.
 
+    Usage example:
     >>> import asyncio
     >>> import monitored_ioloop
     >>> asyncio.set_event_loop_policy(monitored_ioloop.MonitoredUvloopEventLoopPolicy())
     >>> asyncio.get_event_loop()
-    <uvloop.Loop running=False closed=False debug=False>
     """
+
+    def __init__(self, monitor_callback: typing.Callable[[IoLoopMonitorState], None]):
+        warnings.warn(
+            "MonitoredUvloopEventLoopPolicy is deprecated. "
+            "Use monitored_uvloop_loop_factory() instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(monitor_callback)
 
     def _loop_factory(self) -> MonitoredUvloopEventLoop:
         loop = MonitoredUvloopEventLoop(self._monitor_callback)

@@ -1,5 +1,6 @@
 import asyncio
 import typing
+import warnings
 from asyncio import Handle
 
 from mypy_extensions import VarArg
@@ -44,14 +45,26 @@ class MonitoredSelectorEventLoop(asyncio.SelectorEventLoop):
 class MonitoredAsyncIOEventLoopPolicy(BaseMonitoredEventLoopPolicy):
     """Event loop policy.
 
-    The preferred way to make your application use monitored asyncio selector based ioloop:
+    .. deprecated:: 0.0.15
+        Use :func:`monitored_asyncio_loop_factory` instead.
+        The policy-based approach is deprecated in favor of the loop factory approach
+        which is preferred by Python's asyncio documentation.
 
+    Usage example:
     >>> import asyncio
     >>> import monitored_ioloop
     >>> asyncio.set_event_loop_policy(monitored_ioloop.MonitoredAsyncIOEventLoopPolicy())
     >>> asyncio.get_event_loop()
-    <uvloop.Loop running=False closed=False debug=False>
     """
+
+    def __init__(self, monitor_callback: typing.Callable[[IoLoopMonitorState], None]):
+        warnings.warn(
+            "MonitoredAsyncIOEventLoopPolicy is deprecated. "
+            "Use monitored_uvloop_loop_factory() instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        super().__init__(monitor_callback)
 
     def _loop_factory(self) -> MonitoredSelectorEventLoop:
         loop = MonitoredSelectorEventLoop(self._monitor_callback)
