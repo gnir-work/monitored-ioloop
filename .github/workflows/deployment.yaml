@@ -36,29 +36,23 @@ jobs:
         with:
           python-version: 3.11
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
         with:
-          virtualenvs-create: true
-          virtualenvs-in-project: true
+          enable-cache: true
 
-      - name: Load cached venv
-        id: cached-poetry-dependencies
-        uses: actions/cache@v3
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Install just
+        uses: extractions/setup-just@v2
 
       - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction -E uvloop
+        run: just install
 
       - name: Bump version
         id: version-bump
         run: |
-          echo current_version=$(poetry version -s) >> $GITHUB_OUTPUT
-          poetry version patch
-          echo new_version=$(poetry version -s) >> $GITHUB_OUTPUT
+          echo current_version=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])") >> $GITHUB_OUTPUT
+          uv version patch
+          echo new_version=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])") >> $GITHUB_OUTPUT
 
       - name: Push changes
         run: |
@@ -70,7 +64,7 @@ jobs:
 
       - name: Build package
         run: |
-          poetry build
+          uv build
 
       - name: Publish distribution 📦 to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

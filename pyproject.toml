@@ -1,63 +1,63 @@
-[tool.poetry]
+[project]
 name = "monitored_ioloop"
 version = "0.0.14"
 description = ""
-authors = ["gnir <gnir.work@gmail.com>"]
+authors = [{ name = "gnir", email = "gnir.work@gmail.com" }]
+requires-python = ">=3.9"
 readme = "README.md"
-packages = [
-  {include = "monitored_ioloop"},
-  {include = "monitored_ioloop/py.typed"},
+dependencies = ["wrapt>=1.17.2,<2"]
+
+[project.optional-dependencies]
+uvloop = ["uvloop>=0.19.0,<0.20"]
+fastapi = ["fastapi>=0.115.7,<0.116"]
+
+[dependency-groups]
+dev = [
+    "ipython>=8.21.0,<9 ; python_version >= '3.10'",
+    "requests>=2.31.0,<3",
+    "ipdb>=0.13.13,<0.14",
+]
+code_quality = [
+    "mypy>=1.10.1,<2",
+    "ruff>=0.5.1,<0.6",
+    "pytest>=8.0.1,<9",
+    "pytest-cov>=4.1.0,<5",
+    "pytest-xdist>=3.5.0,<4",
+    "pytest-repeat>=0.9.3,<0.10",
+    "httpx>=0.27.0,<0.28",
+]
+stress_test = [
+    "fastapi>=0.115.7,<0.116",
+    "uvicorn>=0.27.1,<0.28",
+    "click>=8.1.7,<9",
+    "locust>=2.23.1,<3",
+]
+examples = [
+    "fastapi>=0.115.7,<0.116",
+    "prometheus-client>=0.20.0,<0.21",
+    "httpx>=0.27.0,<0.28",
 ]
 
+[tool.uv]
+default-groups = [
+    "dev",
+    "code_quality",
+    "stress_test",
+    "examples",
+]
 
-[tool.poetry.dependencies]
-python = "^3.9"
-uvloop = { version ="^0.19.0", optional = true }
-fastapi = { version ="^0.115.7", optional = true }
-wrapt = "^1.17.2"
+[tool.hatch.build.targets.sdist]
+include = [
+    "monitored_ioloop",
+    "monitored_ioloop/py.typed",
+]
 
-[tool.poetry.extras]
-uvloop = ["uvloop"]
-fastapi = ["fastapi"]
-
-[tool.poetry.group.dev]
-optional = true
-
-[tool.poetry.group.dev.dependencies]
-ipython = { version="^8.21.0", python=">=3.10" }
-requests = "^2.31.0"
-ipdb = "^0.13.13"
-
-[tool.poetry.group.code_quality]
-optional = true
-
-[tool.poetry.group.code_quality.dependencies]
-mypy = "^1.10.1"
-ruff = "^0.5.1"
-pytest = "^8.0.1"
-pytest-cov = "^4.1.0"
-pytest-xdist = "^3.5.0"
-pytest-repeat = "^0.9.3"
-httpx = "^0.27.0"
-
-[tool.poetry.group.stress_test]
-optional = true
-
-[tool.poetry.group.stress_test.dependencies]
-fastapi = "^0.115.7"
-uvicorn = "^0.27.1"
-click = "^8.1.7"
-locust = "^2.23.1"
-
-[tool.poetry.group.examples]
-optional = true
-
-[tool.poetry.group.examples.dependencies]
-fastapi = "^0.115.7"
-prometheus-client = "^0.20.0"
-httpx = "^0.27.0"
-
+[tool.hatch.build.targets.wheel]
+include = [
+    "monitored_ioloop",
+    "monitored_ioloop/py.typed",
+]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"

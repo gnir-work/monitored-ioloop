@@ -7,7 +7,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
 
 env:
-  POETRY_GROUPS: stress_test,code_quality,examples
+  GROUPS: stress_test,code_quality,examples
 
 jobs:
   test:
@@ -27,33 +27,22 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
         with:
-          virtualenvs-create: true
-          virtualenvs-in-project: true
+          enable-cache: true
 
-      - name: Create poetry groups cache key
-        id: create-poetry-groups-cache-key
-        run: |
-          echo poetry_groups_cache_key='${{ env.POETRY_GROUPS }}' | sed 's/,/-/g' >> $GITHUB_OUTPUT
-
-      - name: Load cached venv
-        id: cached-poetry-dependencies
-        uses: actions/cache@v3
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}-${{ steps.create-poetry-groups-cache-key.outputs.poetry_groups_cache_key }}
+      - name: Install just
+        uses: extractions/setup-just@v2
 
       - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: make install POETRY_GROUPS=$POETRY_GROUPS
+        run: just install $GROUPS
 
       - name: Lint stress test code
-        run: make lint TARGET_DIR=stress_tests
+        run: just lint stress_tests
 
       - name: Lint tests code
-        run: make lint TARGET_DIR=tests
+        run: just lint tests
 
       - name: Lint tests examples
-        run: make lint TARGET_DIR=examples
+        run: just lint examples
