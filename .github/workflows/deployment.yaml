@@ -41,18 +41,10 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Load cached venv
-        id: cached-uv-dependencies
-        uses: actions/cache@v3
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/uv.lock') }}
-
       - name: Install just
         uses: extractions/setup-just@v2
 
       - name: Install dependencies
-        if: steps.cached-uv-dependencies.outputs.cache-hit != 'true'
         run: just install
 
       - name: Bump version

@@ -31,23 +31,10 @@ jobs:
         with:
           enable-cache: true
 
-      - name: Create groups cache key
-        id: create-groups-cache-key
-        run: |
-          echo groups_cache_key='${{ env.GROUPS }}' | sed 's/,/-/g' >> $GITHUB_OUTPUT
-
-      - name: Load cached venv
-        id: cached-uv-dependencies
-        uses: actions/cache@v3
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/uv.lock') }}-${{ steps.create-groups-cache-key.outputs.groups_cache_key }}
-
       - name: Install just
         uses: extractions/setup-just@v2
 
       - name: Install dependencies
-        if: steps.cached-uv-dependencies.outputs.cache-hit != 'true'
         run: just install $GROUPS
 
       - name: Lint code
