@@ -3,7 +3,7 @@ name = "monitored_ioloop"
 version = "0.0.14"
 description = ""
 authors = [{ name = "gnir", email = "gnir.work@gmail.com" }]
-requires-python = "~=3.9"
+requires-python = ">=3.9"
 readme = "README.md"
 dependencies = ["wrapt>=1.17.2,<2"]
 
