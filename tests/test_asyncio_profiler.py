@@ -104,18 +104,6 @@ class TestMonitoredIOLoop:
             mock.mock_calls[-1].args[0].loop_handles_count == 0
         ), "Handles count should drop to 0."
 
-    def test_monitor_callback_error_is_handled(
-        self,
-        test_case_context: TestCaseContext,
-    ) -> None:
-        mock = test_case_context.mock
-        mock.side_effect = ValueError("This monitor callback raises an exception.")
-        result = run_coroutine(test_case_context, coroutine_with_result())
-        assert mock.call_count > 0
-        assert (
-            result == 10
-        ), "The coroutine should return its result even if the monitor callback fails."
-
     def test_callback_returns_value_even_if_monitor_callback_fails(
         self,
         test_case_context: TestCaseContext,
