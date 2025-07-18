@@ -1,5 +1,5 @@
 TARGET_DIR = .
-GROUPS =
+GROUPS = dev,stress_test,code_quality,examples
 
 install:
 ifdef GROUPS
