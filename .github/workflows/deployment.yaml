@@ -47,6 +47,9 @@ jobs:
       - name: Install dependencies
         run: just install
 
+      - name: Assert lock is up to date
+        run: uv lock --check
+
       - name: Bump version
         id: version-bump
         run: |
