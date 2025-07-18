@@ -64,18 +64,18 @@ This is a Python library that provides production-ready monitored IO loops for P
 
 ### Installation
 ```bash
-make install                    # Install all dependencies
+just install                    # Install all dependencies
 ```
 
 ### Code Quality
 ```bash
-make pre-commit                 # Format + lint (pre-commit hook)
+just pre-commit                 # Format + lint (pre-commit hook)
 ```
 
 ### Testing
 ```bash
-make test                       # Run tests with coverage
-make test-for-flakiness         # Run tests 10 times to check for flakiness
+just test                       # Run tests with coverage
+just test-for-flakiness         # Run tests 10 times to check for flakiness
 ```
 ## Code Quality Standards
 

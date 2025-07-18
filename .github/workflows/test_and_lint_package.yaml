@@ -43,12 +43,15 @@ jobs:
           path: .venv
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/uv.lock') }}-${{ steps.create-groups-cache-key.outputs.groups_cache_key }}
 
+      - name: Install just
+        uses: extractions/setup-just@v2
+
       - name: Install dependencies
         if: steps.cached-uv-dependencies.outputs.cache-hit != 'true'
-        run: make install GROUPS=$GROUPS
+        run: just install $GROUPS
 
       - name: Lint code
-        run: make lint TARGET_DIR=monitored_ioloop
+        run: just lint monitored_ioloop
 
       - name: Run tests
         run: |

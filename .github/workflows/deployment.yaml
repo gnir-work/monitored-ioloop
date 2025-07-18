@@ -48,9 +48,12 @@ jobs:
           path: .venv
           key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/uv.lock') }}
 
+      - name: Install just
+        uses: extractions/setup-just@v2
+
       - name: Install dependencies
         if: steps.cached-uv-dependencies.outputs.cache-hit != 'true'
-        run: make install
+        run: just install
 
       - name: Bump version
         id: version-bump
