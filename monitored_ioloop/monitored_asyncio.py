@@ -2,12 +2,17 @@ import asyncio
 import typing
 from asyncio import Handle
 
+from mypy_extensions import VarArg
+
 from monitored_ioloop.monitored_ioloop_base import BaseMonitoredEventLoopPolicy
 from monitored_ioloop.monitoring import (
     wrap_callback_with_monitoring,
     IoLoopMonitorState,
     IoLoopInnerState,
 )
+
+
+_Ts = typing.TypeVarTuple("_Ts")
 
 
 class MonitoredSelectorEventLoop(asyncio.SelectorEventLoop):
@@ -23,8 +28,8 @@ class MonitoredSelectorEventLoop(asyncio.SelectorEventLoop):
 
     def call_soon(
         self,
-        callback: typing.Callable[..., typing.Any],
-        *args: typing.Any,  # type: ignore
+        callback: typing.Callable[[VarArg(*_Ts)], object],
+        *args: *_Ts,
         **kwargs: typing.Any,
     ) -> Handle:
         callback_with_monitoring = wrap_callback_with_monitoring(

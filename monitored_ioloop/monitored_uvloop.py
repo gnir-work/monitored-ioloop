@@ -1,3 +1,5 @@
+from mypy_extensions import VarArg
+
 from monitored_ioloop.exceptions import NoUvLoopInstalled
 
 try:
@@ -18,6 +20,8 @@ from monitored_ioloop.monitoring import (
     IoLoopInnerState,
 )
 
+_Ts = typing.TypeVarTuple("_Ts")
+
 
 class MonitoredUvloopEventLoop(uvloop.Loop):
     def __init__(
@@ -32,8 +36,8 @@ class MonitoredUvloopEventLoop(uvloop.Loop):
 
     def call_soon(
         self,
-        callback: typing.Callable[..., typing.Any],
-        *args: typing.Any,  # type: ignore
+        callback: typing.Callable[[VarArg(*_Ts)], object],
+        *args: *_Ts,
         **kwargs: typing.Any,
     ) -> Handle:
         callback_with_monitoring = wrap_callback_with_monitoring(
