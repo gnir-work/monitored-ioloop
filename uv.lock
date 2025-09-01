@@ -1098,7 +1098,6 @@ name = "monitored-ioloop"
 version = "0.0.17"
 source = { editable = "." }
 dependencies = [
-    { name = "mypy-extensions" },
     { name = "wrapt" },
 ]
 
@@ -1142,7 +1141,6 @@ stress-test = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi", marker = "extra == 'fastapi'", specifier = ">=0.115.7,<0.116" },
-    { name = "mypy-extensions", specifier = ">=1.1.0" },
     { name = "uvloop", marker = "extra == 'uvloop'", specifier = ">=0.19.0,<0.20" },
     { name = "wrapt", specifier = ">=1.17.2,<2" },
 ]
