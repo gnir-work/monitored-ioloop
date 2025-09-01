@@ -3,14 +3,19 @@ import typing
 import warnings
 from asyncio import Handle
 
-from mypy_extensions import VarArg
-
 from monitored_ioloop.monitored_ioloop_base import BaseMonitoredEventLoopPolicy
 from monitored_ioloop.monitoring import (
     wrap_callback_with_monitoring,
     IoLoopMonitorState,
     IoLoopInnerState,
 )
+
+if typing.TYPE_CHECKING:
+    from mypy_extensions import VarArg
+else:
+
+    def VarArg(x: typing.Any):
+        x
 
 
 _Ts = typing.TypeVarTuple("_Ts")

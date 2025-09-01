@@ -1,5 +1,3 @@
-from mypy_extensions import VarArg
-
 from monitored_ioloop.exceptions import NoUvLoopInstalled
 
 try:
@@ -20,6 +18,14 @@ from monitored_ioloop.monitoring import (
     IoLoopMonitorState,
     IoLoopInnerState,
 )
+
+if typing.TYPE_CHECKING:
+    from mypy_extensions import VarArg
+else:
+
+    def VarArg(x: typing.Any):
+        x
+
 
 _Ts = typing.TypeVarTuple("_Ts")
 
