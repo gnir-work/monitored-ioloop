@@ -1,6 +1,6 @@
 [project]
 name = "monitored_ioloop"
-version = "0.0.18"
+version = "0.0.19"
 description = ""
 authors = [{ name = "gnir", email = "gnir.work@gmail.com" }]
 requires-python = ">=3.9"
