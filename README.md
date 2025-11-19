@@ -122,8 +122,8 @@ Currently there is only the [fastapi with prometheus exporter example](examples/
 - [x] Add loop lag metric (Inspired from nodejs loop monitoring)
 - [x] Add visibility into which `Handle` are making the event loop slower
 - [x] Migrate to new loop factory interface
-- [ ] Add easier integration with `uvicorn`
-- [ ] Add easier integration with popular monitoring tools like Prometheus
+- [x] Add easier integration with `uvicorn`
+- [x] Add easier integration with popular monitoring tools like Prometheus
 
 
 
