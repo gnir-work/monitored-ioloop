@@ -1,6 +1,7 @@
 import asyncio
+import contextlib
 import time
-
+from typing import AsyncGenerator
 from monitored_ioloop.monitored_asyncio import monitored_asyncio_loop_factory
 from monitored_ioloop.monitoring import IoLoopMonitorState
 from monitored_ioloop.helpers.fastapi import (
@@ -8,7 +9,6 @@ from monitored_ioloop.helpers.fastapi import (
 )
 from fastapi import FastAPI
 from prometheus_client import start_http_server, Histogram
-from uvicorn import Server, Config
 
 slow_callbacks_wall_time_histogram = Histogram(
     "slow_callbacks_wall_time_histogram",
@@ -23,7 +23,14 @@ loop_lag_time_histogram = Histogram(
     buckets=[0.000001, 0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 2, 4],
 )
 
-app = FastAPI()
+
+@contextlib.asynccontextmanager
+async def metrics_lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
+    start_http_server(1551)
+    yield
+
+
+app = FastAPI(lifespan=metrics_lifespan)
 app.add_middleware(MonitoredIOLoopMiddleware)
 
 
@@ -44,7 +51,7 @@ async def blocking_slow(sleep_for: int) -> str:
     return f"slept for {sleep_for} seconds"
 
 
-def monitor_ioloop(ioloop_monitor_state: IoLoopMonitorState) -> None:
+def monitor_ioloop_callback(ioloop_monitor_state: IoLoopMonitorState) -> None:
     loop_lag_time_histogram.observe(ioloop_monitor_state.loop_lag)
     callback_wall_time = ioloop_monitor_state.callback_wall_time
     callback_pretty_name = ioloop_monitor_state.callback_pretty_name
@@ -54,16 +61,4 @@ def monitor_ioloop(ioloop_monitor_state: IoLoopMonitorState) -> None:
         )
 
 
-def main() -> None:
-    """
-    Using the new loop factory API for cleaner integration with asyncio.run().
-    """
-    loop_factory = monitored_asyncio_loop_factory(monitor_ioloop)
-    config = Config(app=app, host="localhost", port=1441, loop="asyncio")
-    server = Server(config)
-    start_http_server(1551)
-    asyncio.run(server.serve(), loop_factory=loop_factory)
-
-
-if __name__ == "__main__":
-    main()
+loop_factory = monitored_asyncio_loop_factory(monitor_ioloop_callback)

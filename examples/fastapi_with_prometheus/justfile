@@ -1,6 +1,6 @@
 # Run the FastAPI server with prometheus monitoring
 run:
-    uv run python server.py
+    uv run uvicorn server:app --loop server:loop_factory --port 1441
 
 # Create traffic to test the monitoring
 create-traffic:
