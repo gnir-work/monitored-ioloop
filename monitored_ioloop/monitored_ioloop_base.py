@@ -1,6 +1,11 @@
+import sys
 import typing
-from asyncio.events import BaseDefaultEventLoopPolicy
 from monitored_ioloop.monitoring import IoLoopMonitorState
+
+if sys.version_info >= (3, 14):
+    from asyncio.events import _BaseDefaultEventLoopPolicy as BaseDefaultEventLoopPolicy
+else:
+    from asyncio.events import BaseDefaultEventLoopPolicy
 
 
 class BaseMonitoredEventLoopPolicy(BaseDefaultEventLoopPolicy):
