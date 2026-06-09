@@ -7,6 +7,7 @@ except ImportError:
     # pragma: no cover
     raise NoUvLoopInstalled() from None
 
+import sys
 import typing
 import warnings
 
@@ -19,6 +20,14 @@ from monitored_ioloop.monitoring import (
     IoLoopInnerState,
 )
 
+if sys.version_info >= (3, 11):
+    from typing import TypeVarTuple, Unpack
+else:
+    from typing_extensions import TypeVarTuple, Unpack
+
+_Ts = TypeVarTuple("_Ts")
+
+
 class MonitoredUvloopEventLoop(uvloop.Loop):
     def __init__(
         self,
@@ -30,16 +39,27 @@ class MonitoredUvloopEventLoop(uvloop.Loop):
         self._monitor_callback = monitor_callback
         self._state = IoLoopInnerState(handles_count=0)
 
-    def call_soon(
-        self,
-        callback: typing.Callable[..., object],
-        *args: typing.Any,
-        **kwargs: typing.Any,
-    ) -> Handle:
-        callback_with_monitoring = wrap_callback_with_monitoring(
-            callback, self._monitor_callback, self._state
-        )
-        return super().call_soon(callback_with_monitoring, *args, **kwargs)
+    if typing.TYPE_CHECKING:
+
+        def call_soon(
+            self,
+            callback: typing.Callable[[Unpack[_Ts]], object],
+            *args: Unpack[_Ts],
+            **kwargs: typing.Any,
+        ) -> Handle: ...
+
+    else:
+
+        def call_soon(  # type: ignore[misc]
+            self,
+            callback: typing.Callable[..., object],
+            *args: typing.Any,
+            **kwargs: typing.Any,
+        ) -> Handle:
+            callback_with_monitoring = wrap_callback_with_monitoring(
+                callback, self._monitor_callback, self._state
+            )
+            return super().call_soon(callback_with_monitoring, *args, **kwargs)
 
 
 class MonitoredUvloopEventLoopPolicy(BaseMonitoredEventLoopPolicy):
