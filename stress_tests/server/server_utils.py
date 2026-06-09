@@ -1,5 +1,6 @@
 import enum
 import asyncio
+import typing
 import uvloop
 from monitored_ioloop.monitored_uvloop import MonitoredUvloopEventLoopPolicy
 from monitored_ioloop.monitored_asyncio import (
@@ -7,7 +8,7 @@ from monitored_ioloop.monitored_asyncio import (
 )
 
 
-class IOLoopType(enum.StrEnum):
+class IOLoopType(str, enum.Enum):
     uvloop = "uvloop"
     asyncio = "asyncio"
     monitored_uvloop = "monitored_uvloop"
@@ -16,7 +17,7 @@ class IOLoopType(enum.StrEnum):
 
 def get_io_loop_policy_from_type(
     ioloop_type: IOLoopType,
-) -> type[asyncio.AbstractEventLoopPolicy]:
+) -> typing.Type[asyncio.AbstractEventLoopPolicy]:
     if ioloop_type == IOLoopType.uvloop:
         return uvloop.EventLoopPolicy
     if ioloop_type == IOLoopType.asyncio:

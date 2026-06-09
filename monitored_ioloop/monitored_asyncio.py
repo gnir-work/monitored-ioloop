@@ -10,16 +10,6 @@ from monitored_ioloop.monitoring import (
     IoLoopInnerState,
 )
 
-if typing.TYPE_CHECKING:
-    from mypy_extensions import VarArg
-else:
-
-    def VarArg(x: typing.Any):
-        x
-
-
-_Ts = typing.TypeVarTuple("_Ts")
-
 
 class MonitoredSelectorEventLoop(asyncio.SelectorEventLoop):
     def __init__(
@@ -34,8 +24,8 @@ class MonitoredSelectorEventLoop(asyncio.SelectorEventLoop):
 
     def call_soon(
         self,
-        callback: typing.Callable[[VarArg(*_Ts)], object],
-        *args: *_Ts,
+        callback: typing.Callable[..., object],
+        *args: typing.Any,
         **kwargs: typing.Any,
     ) -> Handle:
         callback_with_monitoring = wrap_callback_with_monitoring(
