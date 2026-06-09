@@ -99,7 +99,9 @@ def run_coroutine(
         assert test_case_context.factory is not None
         return _run_with_loop_factory(coro, test_case_context.factory)
     else:
-        raise AssertionError(f"Unhandled interface type: {test_case_context.interface_type}")
+        raise AssertionError(
+            f"Unhandled interface type: {test_case_context.interface_type}"
+        )
 
 
 class TestMonitoredIOLoop:
