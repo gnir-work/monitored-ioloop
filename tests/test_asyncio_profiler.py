@@ -1,7 +1,7 @@
 import asyncio
+import sys
 import time
 import typing
-from typing import assert_never
 
 import pytest
 
@@ -11,6 +11,21 @@ from tests.utils import (
     _assert_monitor_result,
     _check_monitor_result,
 )
+
+_T = typing.TypeVar("_T")
+
+
+def _run_with_loop_factory(
+    coro: typing.Coroutine[typing.Any, typing.Any, _T],
+    loop_factory: typing.Callable[[], asyncio.AbstractEventLoop],
+) -> _T:
+    if sys.version_info >= (3, 12):
+        return asyncio.run(coro, loop_factory=loop_factory)
+    loop = loop_factory()
+    try:
+        return loop.run_until_complete(coro)
+    finally:
+        loop.close()
 
 
 async def blocking_coroutine(block_for: float) -> None:
@@ -73,18 +88,20 @@ async def several_coroutines_in_gather_with_pretty_name_testing() -> None:
     )
 
 
-def run_coroutine[T](
+def run_coroutine(
     test_case_context: TestCaseContext,
-    coro: typing.Coroutine[typing.Any, typing.Any, T],
-) -> T:
-    match test_case_context.interface_type:
-        case InterfaceType.POLICY:
-            asyncio.set_event_loop_policy(test_case_context.policy)
-            return asyncio.run(coro)
-        case InterfaceType.FACTORY:
-            return asyncio.run(coro, loop_factory=test_case_context.factory)
-        case _ as never:
-            assert_never(never)
+    coro: typing.Coroutine[typing.Any, typing.Any, _T],
+) -> _T:
+    if test_case_context.interface_type == InterfaceType.POLICY:
+        asyncio.set_event_loop_policy(test_case_context.policy)
+        return asyncio.run(coro)
+    elif test_case_context.interface_type == InterfaceType.FACTORY:
+        assert test_case_context.factory is not None
+        return _run_with_loop_factory(coro, test_case_context.factory)
+    else:
+        raise AssertionError(
+            f"Unhandled interface type: {test_case_context.interface_type}"
+        )
 
 
 class TestMonitoredIOLoop:

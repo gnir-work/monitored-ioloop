@@ -34,8 +34,8 @@ class InterfaceType(Enum):
 class TestCaseContext:
     loop_type: LoopType
     interface_type: InterfaceType
-    factory: typing.Callable[[], AbstractEventLoop] | None
-    policy: BaseMonitoredEventLoopPolicy | None
+    factory: typing.Optional[typing.Callable[[], AbstractEventLoop]]
+    policy: typing.Optional[BaseMonitoredEventLoopPolicy]
     mock: Mock
 
 
@@ -54,8 +54,8 @@ def test_case_context(
     loop_type: LoopType, api_type: InterfaceType
 ) -> Generator[TestCaseContext, None, None]:
     mock = Mock()
-    factory: typing.Callable[[], AbstractEventLoop] | None = None
-    policy: BaseMonitoredEventLoopPolicy | None = None
+    factory: typing.Optional[typing.Callable[[], AbstractEventLoop]] = None
+    policy: typing.Optional[BaseMonitoredEventLoopPolicy] = None
 
     if loop_type == LoopType.ASYNCIO:
         if api_type == InterfaceType.POLICY:
